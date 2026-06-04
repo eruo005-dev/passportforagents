@@ -9,6 +9,15 @@ import {
   verifyHosted,
   type AgentPassport,
 } from "../packages/verify/src/index";
+import { base58decode } from "../packages/verify/src/base58";
+
+test("sdk: base58decode handles leading-zero + empty exactly", () => {
+  assert.deepEqual([...base58decode("")], []);
+  assert.deepEqual([...base58decode("1")], [0]); // single zero byte
+  assert.deepEqual([...base58decode("11")], [0, 0]);
+  // round-trip a known value: base58("Z") = 0x20 (32)
+  assert.deepEqual([...base58decode("Z")], [32]);
+});
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (n: string): AgentPassport =>

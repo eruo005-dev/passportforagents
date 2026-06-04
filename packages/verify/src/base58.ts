@@ -7,7 +7,7 @@ const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 /** Decode a base58btc string to bytes (standard Bitcoin alphabet). */
 export function base58decode(s: string): Uint8Array {
-  const bytes: number[] = [0];
+  const bytes: number[] = []; // seed empty so all-zero/empty inputs decode exactly
   for (const ch of s) {
     const val = ALPHABET.indexOf(ch);
     if (val < 0) throw new Error(`invalid base58 char: ${ch}`);
