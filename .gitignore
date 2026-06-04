@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# throwaway test signing key for the spec fixtures — never commit private keys
+spec/fixtures/keypair.json
 
 # vercel
 .vercel
