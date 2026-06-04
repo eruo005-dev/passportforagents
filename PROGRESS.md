@@ -144,11 +144,35 @@ Reviewer LOW advisories: (1) quota meter TOCTOU → **S4 (fix atomically with
 billing)**; (2) unverified agent resolvable by domain (status truthful) →
 documented in `docs/verify-api.md`, backlog.
 
+## Sprint 4-A — A2A verify + freshness webhooks ✅ (CEO: APPROVED 2026-06-04)
+
+Reviewer PASS on all 9 criteria (no BLOCKER/HIGH/MEDIUM). **32 unit + 8 DB
+integration** tests, build + lint clean.
+- Spec-correct **A2A signed Agent Card verifier** (JWS ES256/RS256/EdDSA via Node
+  stdlib; JCS payload = card minus `signatures`; domain-binding policy;
+  off-domain-`jku` attack contained). Zero new deps.
+- **A2A fetch + map**: `/.well-known/agent-card.json`, key from `jku` JWKS over
+  SSRF-safe fetch → valid agents become `a2a_agent`/`key_verified`, surface
+  through the Verify API + trust score with **zero scoring changes**.
+- **Freshness re-verify webhooks**: HMAC-signed (constant-time verify), SSRF-safe
+  IP-pinned POST + bounded retry, **change-only firing** (idempotent; first-run
+  "fresh" doesn't spam), `/api/cron/freshness` (CRON_SECRET) + hourly vercel cron,
+  owner-scoped dashboard.
+- Product **rebranded** AgentPassport → PassportForAgents (UI/docs/Clerk app);
+  wire format `agent-passport.json` preserved.
+
+Backlog (Reviewer LOW): off-host key comment (✅ added), webhook replay-window
+note (→ ships with public webhook docs).
+
 ## Roadmap (post-research-001)
-- **Sprint 4 — billing FIRST, then A2A.** (a) Pricing/billing (Stripe) + the
-  **atomic quota-meter fix** (clears advisory #1) in the same work; (b)
-  A2A-native JWS+JCS sign/verify (the differentiation moat; proposal #1672 open);
-  (c) lightweight re-verify freshness webhooks.
+- **Sprint 4-BILLING — BLOCKED on human (Stripe).** Pricing/billing (Stripe) +
+  the **atomic quota-meter fix** (clears advisory #1), same work. Cannot start
+  until Stripe account/keys/products are provisioned. **Critical path to revenue.**
+- **Sprint 5 (next, autonomous) — MCP Registry ingest + `/registry` index +
+  sitemap.** Ingest+enrich the official MCP Registry (it delegates trust
+  downstream → that's us) into a public, SEO/JSON-LD `/registry` discovery front
+  door. Supply engine ("improve the profile we already built for you") + SEO
+  flywheel. Fully buildable with no human input.
 - **Sprint 5 — ingest + enrich the official MCP Registry** (it delegates trust
   downstream → that's us; supply + SEO engine). **+ `/registry` index page &
   sitemap** (the rest of SEO opportunity #7, now that there's inventory).

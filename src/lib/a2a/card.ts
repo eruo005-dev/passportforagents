@@ -135,6 +135,9 @@ export async function verifyA2ACard(
     checks.domain_binding = true;
   } else {
     const served = normalizeHost(servedFromHost);
+    // NOTE: provider.url is self-asserted, so the OR-branch lets the verifying
+    // key live off the serving host. Safe here because the card was fetched FROM
+    // the claimed (served) domain, so domain control is already implied.
     const provHost = hostOf(card.provider?.url);
     checks.domain_binding = keyHost === served || provHost === served;
   }
