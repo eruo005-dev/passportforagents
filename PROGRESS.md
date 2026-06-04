@@ -198,20 +198,37 @@ uptime, user_rating); no zeroed weights.
 - **dogfood**: our own signed `/.well-known/agent-passport.json` verifies under
   the SDK (dev key; prod key human-gated).
 
-## BUILD STATE (2026-06-05): zero-human-input roadmap EXHAUSTED
+## Sprint 4-BILLING ✅ (CEO: APPROVED) + Sprint 8 — Launch surface ✅ (CEO: APPROVED)
 
-Sprints 1–7 ship a functionally complete, self-dogfooded product (~49 tests,
-build+lint clean throughout, every sprint Reviewer-gated). The CEO's call:
-building more pre-launch surface would be "motion, not progress." The team
-stops here until the founder unblocks the human-gated items.
+- **Billing (code-complete)**: Stripe checkout/portal/webhook + the **atomic
+  quota meter** (per-owner FOR UPDATE lock; TOCTOU closed — proven: 8 concurrent
+  @ quota 3 → exactly 3). plan→quota; builds/boots on blank Stripe env. Live
+  keys/products/ToS are the human gate.
+- **Launch surface**: public `/docs` hub, README badge snippet, MCP self-listing
+  manifest (validated; publish human-gated), billable-count dedup refactor.
 
-### Founder action list (leverage order)
-1. **Stripe** — account + keys + products/prices → unblocks Sprint 4-BILLING +
-   the atomic quota-meter fix. **Highest leverage; longest tail. Do first.**
-2. **Production self-signing key** for the dogfood passport (off the dev key).
-3. **Public-launch / Verify-API announcement GO** (date + channel).
-4. **`npm publish`** of `@passportforagents/verify` (flip `private:false`).
-5. **Design-partner outreach** — approve the target list + send (executor drafts).
+## BUILD STATE (2026-06-05): zero-human-input surface EXHAUSTED — team waiting
+
+Sprints 1–8 + billing ship a functionally complete, self-dogfooded product +
+revenue rail. **~55 tests** (unit + DB integration), build+lint clean
+throughout, every sprint Reviewer-gated (3 real defects caught + fixed: DNS
+token poisoning, chunked-encoding SSRF bypass, registry JSON-LD stored XSS).
+Everything remaining needs the founder.
+
+### Founder action list (do #1 first)
+1. **Production deploy** — push to Vercel with real env (Supabase prod +
+   `DIRECT_URL`, Clerk live keys, `CRON_SECRET`), `npm run db:migrate`, confirm
+   `/`,`/docs`,`/spec`,`/registry` + `/.well-known/agent-passport.json`. Nothing
+   else can be validated end-to-end until a URL exists.
+2. Register **passportforagents.com** + point DNS at the deploy.
+3. **Stripe live** — product/prices, `STRIPE_SECRET_KEY` + price IDs, register
+   `/api/billing/webhook` + copy its signing secret.
+4. **Vercel Cron** schedules for `/api/cron/{ingest,freshness,uptime}` (CRON_SECRET).
+5. **`npm publish`** `@passportforagents/verify` (flip `private:false`).
+6. Build + ship the **`/mcp`** endpoint, then add `remotes` to the manifest +
+   **publish to the MCP registry**.
+7. **Prod self-signing key** for the dogfood passport (off the dev key).
+8. Push `master` → PR to `main`; design-partner outreach (executor drafts, you send).
 
 The self-driving loop (CEO · Reviewer · Researcher · executor) stays live and
 resumes the moment any gate is cleared.
