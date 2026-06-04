@@ -2,8 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAgentBySlug } from "@/lib/agents";
+import { auth } from "@clerk/nextjs/server";
 import { loadTrustScore } from "@/lib/trust/load";
 import { jsonLdScript } from "@/lib/jsonld";
+import { ensureOwner } from "@/lib/owners";
+import { getAgentReviews, isVerifiedOwner } from "@/lib/reviews/service";
+import { ReviewForm } from "./review-form";
 import { VerificationBadge, type AgentStatus } from "@/components/verification-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -39,6 +43,14 @@ export default async function PublicProfile({
   const lastVerified = verifications.find((v) => v.verifiedAt)?.verifiedAt ?? null;
   const trust = await loadTrustScore(agent.id);
   const activeSignals = trust.breakdown.filter((r) => r.value > 0);
+
+  const reviewData = await getAgentReviews(agent.id);
+  const { userId } = await auth();
+  let canReview = false;
+  if (userId) {
+    const owner = await ensureOwner();
+    if (owner && owner.id !== agent.ownerId) canReview = await isVerifiedOwner(owner.id);
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const ownerDomain = agent.verifiedDomain ?? agent.domain;
@@ -192,6 +204,36 @@ export default async function PublicProfile({
               </Link>
               .
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Reviews — only verified owners can review (sybil-resistant). */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="flex items-baseline justify-between text-xs uppercase tracking-wide text-muted-foreground">
+              <span>Reviews</span>
+              <span className="font-mono text-sm text-foreground">
+                {reviewData.count > 0 ? `${reviewData.avg.toFixed(1)} ★ · ${reviewData.count}` : "no reviews yet"}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {reviewData.reviews.length > 0 ? (
+              <ul className="space-y-3">
+                {reviewData.reviews.map((r) => (
+                  <li key={r.id} className="border-b border-border pb-2 text-sm last:border-0">
+                    <span className="font-mono text-warning">{"★".repeat(r.rating)}</span>
+                    {r.comment && <span className="ml-2 text-muted-foreground">{r.comment}</span>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Only verified agent owners can review, one each — keeping ratings
+                sybil-resistant.
+              </p>
+            )}
+            {canReview && <ReviewForm agentId={agent.id} slug={agent.slug} />}
           </CardContent>
         </Card>
 

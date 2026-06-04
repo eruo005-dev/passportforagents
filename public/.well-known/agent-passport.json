@@ -1,0 +1,16 @@
+{
+  "spec_version": "0.1.0",
+  "agent_name": "PassportForAgents",
+  "agent_type": "mcp_server",
+  "owner_domain": "passportforagents.com",
+  "public_key": "z6Mkq4pe3wWF7X7fHvdgMJwgzFAsUFr7TCRXq9zMZiRiw4JH",
+  "capabilities": [
+    "verify",
+    "registry",
+    "trust-score"
+  ],
+  "homepage": "https://passportforagents.com",
+  "repo": "https://github.com/passportforagents/passportforagents",
+  "issued_at": "2026-06-04T00:00:00Z",
+  "signature": "z61GkRh4msH8etywJTeVADkmnpPKkMaMwMtruYSjVSAXj3C7QzUCaCUnkdQ7NaZo442t1SeaKEBynaDp5PCMxNV1c"
+}

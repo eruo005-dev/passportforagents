@@ -21,7 +21,7 @@ function expiry(): Date {
 }
 
 /** Replace any existing trust signal of a type with the latest value. */
-async function upsertTrustSignal(
+export async function upsertTrustSignal(
   agentId: string,
   signalType: keyof typeof TRUST_WEIGHTS,
   value: number,

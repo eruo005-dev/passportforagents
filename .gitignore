@@ -36,6 +36,7 @@ yarn-error.log*
 
 # throwaway test signing key for the spec fixtures — never commit private keys
 spec/fixtures/keypair.json
+spec/fixtures/self-keypair.json
 
 # vercel
 .vercel

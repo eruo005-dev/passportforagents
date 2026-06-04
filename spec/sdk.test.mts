@@ -56,6 +56,14 @@ test("sdk: signature-only mode (host=null) passes for a valid doc", async () => 
   assert.equal(r.valid, true);
 });
 
+test("sdk: dogfood self-passport verifies (AC5)", async () => {
+  const doc = JSON.parse(
+    readFileSync(join(here, "..", "public", ".well-known", "agent-passport.json"), "utf8"),
+  );
+  assert.equal((await verifyPassport(doc, null)).valid, true); // signature-only
+  assert.equal((await verifyPassport(doc, "passportforagents.com")).valid, true); // domain match
+});
+
 test("sdk: hosted verify parses 200 and surfaces 401", async () => {
   const ok = await verifyHosted({
     agent: "acme",
