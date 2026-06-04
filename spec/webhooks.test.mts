@@ -34,8 +34,9 @@ test("evaluateFreshness: change detection vs stored state", () => {
   const past = new Date("2026-06-01T00:00:00Z");
   const future = new Date("2026-09-01T00:00:00Z");
 
-  // first evaluation (no stored state) always counts as a change
-  assert.deepEqual(evaluateFreshness(null, future, now), { current: "fresh", changed: true });
+  // first evaluation: initial healthy state does NOT fire (avoids cron spam);
+  // first-ever-stale DOES fire.
+  assert.deepEqual(evaluateFreshness(null, future, now), { current: "fresh", changed: false });
   assert.deepEqual(evaluateFreshness(null, past, now), { current: "stale", changed: true });
 
   // no change when stored == current

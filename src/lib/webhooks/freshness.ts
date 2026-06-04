@@ -19,8 +19,12 @@ export function freshnessLabel(stale: boolean): FreshnessLabel {
 }
 
 /**
- * Decide the current label and whether it changed from the stored state.
+ * Decide the current label, whether to PERSIST it, and whether to FIRE a webhook.
  * `previous` is `agents.freshness_state` (null on first evaluation).
+ *
+ * Fire on any real transition (fresh↔stale), and on a first-ever evaluation that
+ * is already stale — but NOT on the initial healthy (fresh) state, so the first
+ * cron sweep doesn't spam receivers with spurious "fresh" events.
  */
 export function evaluateFreshness(
   previous: string | null,
@@ -28,5 +32,6 @@ export function evaluateFreshness(
   now: Date,
 ): { current: FreshnessLabel; changed: boolean } {
   const current = freshnessLabel(computeStale(expiresAt, now));
-  return { current, changed: previous !== current };
+  const changed = previous === null ? current === "stale" : previous !== current;
+  return { current, changed };
 }

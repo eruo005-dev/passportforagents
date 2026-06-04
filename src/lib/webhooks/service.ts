@@ -106,14 +106,16 @@ export async function runFreshnessSweep(
       where: and(eq(verifications.agentId, agent.id), isNotNull(verifications.verifiedAt)),
       orderBy: [desc(verifications.verifiedAt)],
     });
-    const { current, changed: didChange } = evaluateFreshness(
+    const { current, changed: shouldFire } = evaluateFreshness(
       agent.freshnessState,
       latest?.expiresAt ?? null,
       now,
     );
-    if (!didChange) continue;
-
-    await db.update(agents).set({ freshnessState: current }).where(eq(agents.id, agent.id));
+    // Keep stored state accurate even when we don't fire (e.g. initial "fresh").
+    if (current !== agent.freshnessState) {
+      await db.update(agents).set({ freshnessState: current }).where(eq(agents.id, agent.id));
+    }
+    if (!shouldFire) continue;
     changed++;
 
     const endpoints = await db.query.webhookEndpoints.findMany({
