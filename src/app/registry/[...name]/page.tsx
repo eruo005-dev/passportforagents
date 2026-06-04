@@ -2,10 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getRegistryEntry } from "@/lib/registry/ingest";
+import { jsonLdScript } from "@/lib/jsonld";
 import { Button } from "@/components/ui/button";
 
-function decodeName(parts: string[]): string {
-  return parts.map(decodeURIComponent).join("/");
+/** Decode catch-all segments; returns null on malformed percent-encoding. */
+function decodeName(parts: string[]): string | null {
+  try {
+    return parts.map(decodeURIComponent).join("/");
+  } catch {
+    return null;
+  }
+}
+
+function encodeName(name: string): string {
+  return name.split("/").map(encodeURIComponent).join("/");
 }
 
 export async function generateMetadata({
@@ -14,7 +24,8 @@ export async function generateMetadata({
   params: Promise<{ name: string[] }>;
 }): Promise<Metadata> {
   const { name } = await params;
-  const entry = await getRegistryEntry(decodeName(name));
+  const decoded = decodeName(name);
+  const entry = decoded ? await getRegistryEntry(decoded) : null;
   if (!entry) return { title: "Server not found — PassportForAgents" };
   return {
     title: `${entry.name} — MCP Registry — PassportForAgents`,
@@ -28,17 +39,18 @@ export default async function RegistryDetailPage({
   params: Promise<{ name: string[] }>;
 }) {
   const { name } = await params;
-  const entry = await getRegistryEntry(decodeName(name));
+  const decoded = decodeName(name);
+  const entry = decoded ? await getRegistryEntry(decoded) : null;
   if (!entry) notFound();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://passportforagents.com";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: entry.name,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Model Context Protocol",
-    url: `${appUrl}/registry/${name.join("/")}`,
+    url: `${appUrl}/registry/${encodeName(entry.name)}`,
     ...(entry.description ? { description: entry.description } : {}),
     ...(entry.repoUrl ? { codeRepository: entry.repoUrl } : {}),
     ...(entry.version ? { softwareVersion: entry.version } : {}),
@@ -48,7 +60,7 @@ export default async function RegistryDetailPage({
     <div className="flex min-h-screen flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">

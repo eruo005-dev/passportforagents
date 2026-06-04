@@ -1,6 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseEntry, fetchRegistryPage } from "../src/lib/registry/mcp";
+import { jsonLdScript } from "../src/lib/jsonld";
+
+test("jsonLdScript: escapes </script> breakout but stays valid JSON", () => {
+  const evil = { name: "x</script><script>alert(1)</script>", desc: "a & b > c < d" };
+  const out = jsonLdScript(evil);
+  assert.ok(!out.includes("</script>"), "no raw </script> breakout");
+  assert.ok(!out.includes("<"), "no raw < ");
+  assert.ok(!out.includes(">"), "no raw >");
+  assert.deepEqual(JSON.parse(out), evil, "still parses back to the original object");
+});
 
 const sampleEl = {
   server: {

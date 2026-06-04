@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAgentBySlug } from "@/lib/agents";
 import { loadTrustScore } from "@/lib/trust/load";
+import { jsonLdScript } from "@/lib/jsonld";
 import { VerificationBadge, type AgentStatus } from "@/components/verification-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -68,7 +69,7 @@ export default async function PublicProfile({
     <div className="flex min-h-screen flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">
