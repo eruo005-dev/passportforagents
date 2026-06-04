@@ -83,6 +83,8 @@ export const agents = pgTable("agents", {
   /** Declared capabilities mirrored from the passport document. */
   capabilities: jsonb("capabilities").$type<string[]>(),
   status: agentStatusEnum("status").notNull().default("unverified"),
+  /** Last-known freshness ("fresh" | "stale") so webhooks fire only on change. */
+  freshnessState: text("freshness_state"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
 });
@@ -180,6 +182,24 @@ export const apiKeys = pgTable("api_keys", {
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   /** Soft-delete: revoked keys are rejected but preserved for call attribution. */
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
+});
+
+// ── webhook_endpoints ─────────────────────────────────────────────────────--
+// Owner-registered callback URLs. We POST HMAC-signed events (e.g. an agent's
+// verification going stale/fresh). Delivery is SSRF-safe (owner-supplied URL).
+
+export const webhookEndpoints = pgTable("webhook_endpoints", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: uuid("owner_id")
+    .notNull()
+    .references(() => owners.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  /** HMAC-SHA256 signing secret (shown once at creation). */
+  secret: text("secret").notNull(),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastDeliveryAt: timestamp("last_delivery_at", { withTimezone: true }),
+  lastStatus: text("last_status"),
 });
 
 // ── verification_calls ────────────────────────────────────────────────────--

@@ -84,8 +84,11 @@ export async function safeFetch(
     }
   }
 
+  const method = (init?.method ?? "GET").toUpperCase();
+  const body = typeof init?.body === "string" ? init.body : undefined;
+
   const options: RequestOptions = {
-    method: "GET",
+    method,
     servername: url.hostname, // SNI + cert validation use the hostname…
     // …but the socket connects to the exact vetted IP (DNS-rebind closed).
     lookup: (_hostname, _opts, cb) =>
@@ -98,13 +101,14 @@ export async function safeFetch(
     const req = httpsRequest(url, options, resolve);
     req.on("timeout", () => req.destroy(new UnsafeUrlError("request timed out")));
     req.on("error", reject);
+    if (body) req.write(body);
     req.end();
   });
 
   const status = res.statusCode ?? 0;
   if (status >= 300 && status < 400) {
     res.destroy();
-    throw new UnsafeUrlError("redirects are not allowed during verification");
+    throw new UnsafeUrlError("redirects are not allowed");
   }
 
   const declared = Number(res.headers["content-length"] ?? "0");
