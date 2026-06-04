@@ -14,6 +14,9 @@ export default function Home() {
             <Button asChild variant="ghost" size="sm">
               <Link href="/registry">Registry</Link>
             </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/docs">Docs</Link>
+            </Button>
             <Show when="signed-out">
               <SignInButton mode="modal">
                 <Button variant="ghost" size="sm">

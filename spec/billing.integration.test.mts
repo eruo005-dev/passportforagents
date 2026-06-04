@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 import { closeDb, db } from "../src/db/index";
 import { agents, owners } from "../src/db/schema";
 import { runVerify } from "../src/lib/api/verify";
-import { createApiKey } from "../src/lib/api-keys/service";
+import { createApiKey, monthlyUsage } from "../src/lib/api-keys/service";
 import { createCheckoutSession, type StripeLike } from "../src/lib/billing/service";
 import { constructStripeEvent, routeStripeEvent } from "../src/lib/billing/webhook";
 import { getStripe } from "../src/lib/billing/stripe";
@@ -43,6 +43,9 @@ test("atomic quota: N concurrent calls at quota K → exactly K granted (AC-a)",
   const limited = results.filter((r) => r.status === 429).length;
   assert.equal(ok, K, "exactly K granted under concurrency (no TOCTOU over-grant)");
   assert.equal(limited, N - K, "the rest are 429");
+
+  // Dashboard meter uses the SAME billable-count predicate as the enforced grant.
+  assert.equal(await monthlyUsage(owner.id), K, "displayed meter == enforced meter");
 });
 
 test("checkout: builds a subscription session with the plan price (AC-c)", async () => {

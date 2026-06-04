@@ -65,9 +65,12 @@ function startOfUtcMonth(): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
 
-/** Count this owner's BILLABLE (result=ok) verify calls in the current UTC month. */
-export async function monthlyUsage(ownerId: string): Promise<number> {
-  const [row] = await db
+/** Single source of truth for "billable (result=ok) calls this UTC month".
+ *  Used by BOTH the display meter and the enforced quota grant so they can't
+ *  drift. Works against the db or a transaction. */
+type DbOrTx = Pick<typeof db, "select">;
+async function countBillableThisMonth(executor: DbOrTx, ownerId: string): Promise<number> {
+  const [row] = await executor
     .select({ count: sql<number>`count(*)::int` })
     .from(verificationCalls)
     .innerJoin(apiKeys, eq(verificationCalls.apiKeyId, apiKeys.id))
@@ -79,6 +82,11 @@ export async function monthlyUsage(ownerId: string): Promise<number> {
       ),
     );
   return row?.count ?? 0;
+}
+
+/** This owner's billable verify calls in the current UTC month (dashboard meter). */
+export async function monthlyUsage(ownerId: string): Promise<number> {
+  return countBillableThisMonth(db, ownerId);
 }
 
 /**
@@ -98,18 +106,8 @@ export async function grantBillableCall(
   let granted = false;
   await db.transaction(async (tx) => {
     await tx.execute(sql`select 1 from owners where ${owners.id} = ${ownerId} for update`);
-    const [row] = await tx
-      .select({ count: sql<number>`count(*)::int` })
-      .from(verificationCalls)
-      .innerJoin(apiKeys, eq(verificationCalls.apiKeyId, apiKeys.id))
-      .where(
-        and(
-          eq(apiKeys.ownerId, ownerId),
-          gte(verificationCalls.calledAt, startOfUtcMonth()),
-          sql`${verificationCalls.result}->>'result' = 'ok'`,
-        ),
-      );
-    if ((row?.count ?? 0) < quota) {
+    // Same count predicate as the dashboard meter — single source of truth.
+    if ((await countBillableThisMonth(tx, ownerId)) < quota) {
       await tx.insert(verificationCalls).values({ apiKeyId, agentId, result });
       granted = true;
     }

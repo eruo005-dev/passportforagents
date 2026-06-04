@@ -70,4 +70,20 @@ SPEC.md                 # the open spec
 PROGRESS.md             # build log
 ```
 
+## Embed the verified badge
+
+A live, cacheable SVG that reflects an agent's current status + trust score and
+links back to its public profile (unspoofable — it's a live lookup):
+
+```md
+[![PassportForAgents](https://passportforagents.com/agent/<slug>/badge)](https://passportforagents.com/agent/<slug>)
+```
+
+## Docs
+
+- **`/docs`** — developer hub (spec, Verify API, trust score, SDK quickstart, badge)
+- **`/spec`** + [`SPEC.md`](./SPEC.md) — the open Agent Passport wire format
+- [`docs/verify-api.md`](./docs/verify-api.md) · [`docs/trust-score.md`](./docs/trust-score.md)
+- **`@passportforagents/verify`** ([packages/verify](./packages/verify)) — zero-dep verify-before-connect SDK
+
 Progress is tracked in [`PROGRESS.md`](./PROGRESS.md). License: [MIT](./LICENSE).
