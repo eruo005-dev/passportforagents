@@ -38,7 +38,8 @@ export async function runUptimeSweep(opts: {
     } catch {
       ok = false;
     }
-    ok ? up++ : down++;
+    if (ok) up++;
+    else down++;
 
     const existing = await db.query.trustSignals.findFirst({
       where: and(eq(trustSignals.agentId, agent.id), eq(trustSignals.signalType, "uptime")),
