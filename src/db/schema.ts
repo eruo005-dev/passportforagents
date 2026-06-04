@@ -71,8 +71,11 @@ export const agents = pgTable("agents", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
+  /** The domain the owner claims to control (set at claim time). */
+  domain: text("domain").notNull(),
   homepageUrl: text("homepage_url"),
   repoUrl: text("repo_url"),
+  /** Set once domain control is proven; may differ from `domain` in edge cases. */
   verifiedDomain: text("verified_domain"),
   /** Ed25519 public key as multibase Multikey. The identity primitive seam. */
   publicKey: text("public_key"),

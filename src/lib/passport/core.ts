@@ -152,7 +152,10 @@ export type FetchAndVerifyResult = VerifyResult & {
  */
 export async function fetchAndVerify(
   domain: string,
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: (
+    input: string,
+    init?: RequestInit,
+  ) => Promise<Response> = fetch,
 ): Promise<FetchAndVerifyResult> {
   const url = wellKnownUrl(domain);
   const base = {

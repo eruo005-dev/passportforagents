@@ -67,10 +67,62 @@ npm run db:studio      # inspect the live schema / owners row
 
 ---
 
-## Next: Sprint 2 — Verification + profiles (not started)
+## Operating model change (2026-06-04)
 
-GitHub / `.well-known` / DNS-TXT verification flows; claim an MCP server; public
-profile at `/agent/[slug]`.
+Switched to a self-driving founding team (see `WORKING_AGREEMENT.md`):
+**CEO agent** scopes → **executor** (main session) builds + self-verifies →
+**Reviewer agent** adversarially gates → CEO signs off → next sprint. Full-auto
+per sprint; only the human-guardrail actions (money/publish/keys/delete/legal/
+fundraise) stop for the human.
 
-**New keys needed at Sprint 2:** `GITHUB_TOKEN` (repo verification),
-`RESEND_API_KEY` (verification emails).
+---
+
+## Sprint 2 — Claim, Verify, Public Profile ✅ (CEO: APPROVED)
+
+**Goal met:** an owner claims an MCP server, proves domain control via
+`.well-known` (signature → `key_verified`) or DNS TXT (→ `domain_verified`), and
+the world sees a public profile at `/agent/[slug]`. Zero new keys required.
+
+### Done
+- **Claim flow** (`/dashboard/agents/new`) → `agents` row + unique slug
+  (collision retry on PG 23505) + pending DNS challenge token.
+- **`.well-known` + Ed25519 verification** (primary) → `key_verified`, mirrors
+  `public_key`/`capabilities`/`verifiedDomain`, writes `verifications.evidence`
+  + `domain_control`/`signed_provenance` trust signals. **SSRF-hardened fetch**:
+  blocks private/loopback/link-local/CGNAT/IPv6/mapped ranges, HTTPS-only,
+  refuses redirects, 5s timeout, 64KB cap enforced on **streamed bytes**.
+- **DNS TXT verification** (secondary) → `domain_verified`; never downgrades a
+  `key_verified` agent; never itself reaches `key_verified`.
+- **Public profile** `/agent/[slug]` (SSR, anonymous, 404 on unknown) + dashboard
+  agent list with status pills. Server-side ownership on every mutating action.
+- **Tests:** 9 unit (valid/tampered/wrong-host, dns match/missing/exact,
+  safe-fetch cap) + 3 DB integration (key_verified persistence,
+  token-poisoning regression, tampered-stays-unverified). build + lint clean.
+
+### Review loop
+First Reviewer pass **FAILed** — caught a real **HIGH** (a `.well-known` verify
+poisoned the DNS challenge-token lookup → broke the DNS path) and a **MEDIUM**
+(header-only size cap bypassable via chunked encoding). Both fixed + a LOW slug
+race; re-review **PASS**, findings independently verified.
+
+### Known limitation (tracked)
+- **DNS-rebind TOCTOU** in `safeFetch`: we vet the resolved IP then fetch by
+  hostname. Accepted for v1; to be hardened (pin the vetted IP) before the public
+  Verify API is exposed at scale.
+
+---
+
+## Next: Sprint 3 — the revenue layer (CEO-scoped)
+
+Trust-signal **scoring pipeline** (+ MCP secret-hygiene scan), embeddable
+**Verified-Agent badge** (`/agent/[slug]/badge`), and the **public Verify REST
+API** (`/api/v1/verify`) with API-key auth + `verification_calls` logging (the
+billing meter).
+
+### ESCALATE TO HUMAN (raised by the CEO agent)
+1. **Pricing + plan tiers** — needed before billing wires in (Sprint 4). Business call.
+2. **Secret-hygiene scan scope/liability** — scanning third-party endpoints for
+   leaked secrets has legal/ToS implications; confirm acceptable scope (declared
+   endpoints only, no aggressive crawling) before shipping that signal.
+3. **DNS-rebind hardening** — promote the v1 TOCTOU note to a tracked fix before
+   the Verify API is public at scale. (Technical — executor will handle.)
