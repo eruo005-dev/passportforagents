@@ -1,0 +1,16 @@
+{
+  "spec_version": "0.1.0",
+  "agent_name": "Example MCP Server",
+  "agent_type": "mcp_server",
+  "owner_domain": "example.com",
+  "public_key": "z6Mku3vJ6pNQNsCMvFxUwS3YZvMorTFUiosP2x4EGbMM6MWT",
+  "capabilities": [
+    "tools/list",
+    "tools/call",
+    "resources/read"
+  ],
+  "homepage": "https://example.com",
+  "repo": "https://github.com/example/mcp-server",
+  "issued_at": "2026-06-04T00:00:00Z",
+  "signature": "z4QbxxbDkQn7KJPr39ckAV5HKgzb3VuMkjrK458YUjRYRTZqzzWtrx1AKNpaxCkegPp3WcfqwaZm4NB7KYUGRWQEp"
+}
