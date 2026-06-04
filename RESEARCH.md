@@ -12,6 +12,36 @@ Produced by the `researcher` agent, vetted by the `reviewer`, triaged by the
 
 <!-- New research passes are appended below this line. -->
 
+## Pass 002 — 2026-06-04 · A2A signed Agent Card mechanics (build-grounding)
+
+Primary sources: A2A spec v1.0.0 (`a2aproject/A2A` `docs/specification.md`,
+`specification/a2a.proto`), a2a-protocol.org, RFC 7515/8785/8615.
+
+- **Card:** `GET /.well-known/agent-card.json` (legacy fallback `/.well-known/agent.json`);
+  accept `application/json` + `application/a2a+json`; honor ETag/Cache-Control.
+- **Signature (§8.4):** JWS (RFC 7515), **JSON serialization, detached payload**;
+  lives in a `signatures[]` array of `{protected, signature, header?}`. Signing is
+  **MAY**, not MUST.
+- **alg:** spec exemplifies **ES256 / RS256**; does NOT close the set or mandate
+  EdDSA. → accepted-alg allowlist is ours to choose (support ES256+RS256, plan EdDSA).
+- **Signed input:** payload = **JCS (RFC 8785) of the card with `signatures` excluded**,
+  applying protobuf field-presence (drop non-required default/empty like `extensions:[]`);
+  JWS input = `BASE64URL(protected).BASE64URL(payload)`.
+- **Key:** resolved via protected-header `kid` (+ optional `jku` JWKS URL over HTTPS).
+  No mandated `jwk`/`x5c`/DID.
+- **Identity binding is weak** — spec relies on TLS; binding key↦org is left to the
+  verifier. **Our policy:** require `jku` host (or signing domain) to match the card's
+  serving domain / `provider.url` host.
+- **#1672 (`verifiedIdentity`):** OPEN issue, **maintainer-unendorsed, community-only**
+  (proposes a 3rd-party CA `getagentid.dev`). Treat as ecosystem signal, NOT spec —
+  **do not hardcode any single CA/registry**; keep identity-model pluggable.
+
+**Build implications (applied):** JWS verify via Node stdlib `crypto` (ES256/RS256/EdDSA,
+JWK import) → zero new deps; canonicalize card-as-received minus `signatures` via our
+inline JCS; injectable key resolver (JWKS via safeFetch); our own domain-binding policy;
+field-presence handling is the top false-negative risk → fixtures sign exactly what the
+verifier reconstructs.
+
 ## Pass 001 — 2026-06-04 · Pricing/freemium · Competitive watch · Opportunities
 
 **Reviewer verdict:** TRUSTWORTHY WITH CAVEATS — all high-stakes claims confirmed
