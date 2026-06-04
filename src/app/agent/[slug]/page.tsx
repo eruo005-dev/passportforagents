@@ -39,8 +39,37 @@ export default async function PublicProfile({
   const trust = await loadTrustScore(agent.id);
   const activeSignals = trust.breakdown.filter((r) => r.value > 0);
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const ownerDomain = agent.verifiedDomain ?? agent.domain;
+  // JSON-LD structured data → SEO + AI-citation (AEO/GEO) of verified facts.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: agent.name,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Model Context Protocol",
+    url: `${appUrl}/agent/${agent.slug}`,
+    ...(agent.description ? { description: agent.description } : {}),
+    ...(agent.homepageUrl || agent.repoUrl
+      ? { sameAs: [agent.homepageUrl, agent.repoUrl].filter(Boolean) }
+      : {}),
+    publisher: {
+      "@type": "Organization",
+      name: ownerDomain,
+      url: `https://${ownerDomain}`,
+    },
+    additionalProperty: [
+      { "@type": "PropertyValue", name: "verificationStatus", value: agent.status },
+      { "@type": "PropertyValue", name: "trustScore", value: trust.score, maxValue: 100 },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">
           <Link href="/" className="font-mono text-sm font-semibold tracking-tight">

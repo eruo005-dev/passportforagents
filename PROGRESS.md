@@ -121,20 +121,49 @@ already contested (mcp-trust.com, AgentAudit, et al.). The moat is the signed
 identity primitive + A2A-native verify + the embeddable live badge. See
 `RESEARCH.md` pass 001.
 
-## Roadmap (post-research-001)
+## Sprint 3 — Revenue layer ✅ (CEO: APPROVED 2026-06-04)
 
-- **Sprint 3 (in progress) — RESEQUENCED + AUGMENTED.** Lead with **badge +
-  Verify API + secret-hygiene**; trust score (module 1, shipped) rides along as
-  enrichment. **Added:** free public trust-report SEO/GEO pages (S-sized,
-  acquisition). DNS-rebind TOCTOU fix lands here (pre-public Verify API).
-- **Sprint 4 (elevated) — A2A-native JWS+JCS sign/verify** (the differentiation
-  moat; A2A proposal #1672 is open) + lightweight re-verify freshness webhooks +
-  **pricing/billing** (informed by design-partner price tests).
-- **Sprint 5 — ingest + enrich the official MCP Registry** (it explicitly
-  delegates trust downstream → that's us; supply + SEO engine).
+All 6 locked criteria PASS (Reviewer-verified). **31 tests** (23 unit + 8 DB
+integration), build + lint clean.
+- Transparent trust score + per-signal breakdown on the public profile;
+  doc↔code drift test. Score is enrichment, not the pitch.
+- Embeddable live SVG badge `/agent/[slug]/badge` (cacheable, anonymous,
+  unspoofable, links back).
+- Secret-hygiene scan: light active probing of a FIXED allowlist on the agent's
+  OWN claimed domain (record-derived), sequential/gentle via SSRF-safe fetch,
+  stores path+redacted reason never the value, disclosed at claim.
+- Public **Verify API** `/api/v1/verify`: hash-auth, identity+status+score, no
+  owner data leaked, every call logged to `verification_calls`, free-quota 429.
+  Dashboard API-key create/revoke + usage meter. (Meter only — NO Stripe yet.)
+- **DNS-rebind TOCTOU closed**: safeFetch pins the vetted IP (TLS validates
+  hostname); zero new deps.
+- **S3.5 micro-task done:** JSON-LD structured data on the profile (SEO/AEO);
+  `docs/verify-api.md` documents the `verified`-semantics note.
+
+Reviewer LOW advisories: (1) quota meter TOCTOU → **S4 (fix atomically with
+billing)**; (2) unverified agent resolvable by domain (status truthful) →
+documented in `docs/verify-api.md`, backlog.
+
+## Roadmap (post-research-001)
+- **Sprint 4 — billing FIRST, then A2A.** (a) Pricing/billing (Stripe) + the
+  **atomic quota-meter fix** (clears advisory #1) in the same work; (b)
+  A2A-native JWS+JCS sign/verify (the differentiation moat; proposal #1672 open);
+  (c) lightweight re-verify freshness webhooks.
+- **Sprint 5 — ingest + enrich the official MCP Registry** (it delegates trust
+  downstream → that's us; supply + SEO engine). **+ `/registry` index page &
+  sitemap** (the rest of SEO opportunity #7, now that there's inventory).
 - **Sprint 6 — "verify before connect" MCP client/gateway SDK** (verifier-side
   revenue compounds).
-- **Backlog:** sigstore/SLSA provenance enrichment.
+- **Backlog:** sigstore/SLSA provenance enrichment; quota TOCTOU note (folded
+  into S4 billing).
+
+### ESCALATE TO HUMAN — S4
+- **Live Stripe keys + account/ToS/tax setup** — human provisions the Stripe
+  account, sets products/prices, supplies keys via env/secret store (never repo).
+  Blocks the billing half of S4.
+- **Public Verify-API announcement** — going public is a one-way trust
+  commitment (SLA/abuse surface). Code ships behind keys without it; explicit
+  human GO required before any public launch/marketing of the endpoint.
 
 ### ESCALATE TO HUMAN — ✅ ALL GREENLIT (2026-06-04)
 1. **Pricing** — ✅ APPROVED as the model to build toward: Free = unlimited claims
