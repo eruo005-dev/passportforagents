@@ -1,0 +1,25 @@
+{
+  "name": "@passportforagents/verify",
+  "version": "0.1.0",
+  "description": "Verify-before-connect SDK for MCP clients & gateways — zero dependencies. Verify an agent's signed identity locally or via the hosted Verify API.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["mcp", "agent", "verification", "ed25519", "passportforagents"]
+}

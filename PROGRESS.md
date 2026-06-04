@@ -176,10 +176,15 @@ note (→ ships with public webhook docs).
 - **Sprint 5 — ingest + enrich the official MCP Registry** (it delegates trust
   downstream → that's us; supply + SEO engine). **+ `/registry` index page &
   sitemap** (the rest of SEO opportunity #7, now that there's inventory).
-- **Sprint 6 — "verify before connect" MCP client/gateway SDK** (verifier-side
-  revenue compounds).
+- **Sprint 6 — "verify before connect" SDK ✅ (built, awaiting gate).**
+  `@passportforagents/verify` (packages/verify) — ZERO npm deps (WebCrypto
+  Ed25519 + inline base58/JCS). `verifyStandalone(domain)` verifies a passport
+  fully locally; `verifyHosted({agent,apiKey})` calls the Verify API. Built +
+  tested in-repo (43 unit tests incl. a WebCrypto-interop proof that the
+  @noble-signed fixture verifies under the SDK); NOT published (human-gated).
+  Also: cron secret compare is now constant-time (`src/lib/cron-auth.ts`).
 - **Backlog:** sigstore/SLSA provenance enrichment; quota TOCTOU note (folded
-  into S4 billing).
+  into S4 billing); npm publish of the SDK (human-gated).
 
 ### ESCALATE TO HUMAN — S4
 - **Live Stripe keys + account/ToS/tax setup** — human provisions the Stripe

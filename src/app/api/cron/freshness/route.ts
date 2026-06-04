@@ -1,4 +1,5 @@
 import { runFreshnessSweep } from "@/lib/webhooks/service";
+import { cronAuthorized } from "@/lib/cron-auth";
 
 /**
  * Freshness sweep cron. Vercel Cron calls this with
@@ -6,11 +7,7 @@ import { runFreshnessSweep } from "@/lib/webhooks/service";
  * Fires freshness-change webhooks. Schedule in vercel.json.
  */
 export async function GET(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  const auth = req.headers.get("authorization");
-  if (!secret || auth !== `Bearer ${secret}`) {
-    return new Response("unauthorized", { status: 401 });
-  }
+  if (!cronAuthorized(req)) return new Response("unauthorized", { status: 401 });
   const summary = await runFreshnessSweep();
   return Response.json({ ok: true, ...summary });
 }

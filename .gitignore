@@ -40,6 +40,9 @@ spec/fixtures/keypair.json
 # vercel
 .vercel
 
+# package build output
+/packages/*/dist
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
