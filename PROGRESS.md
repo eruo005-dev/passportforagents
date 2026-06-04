@@ -112,21 +112,40 @@ race; re-review **PASS**, findings independently verified.
 
 ---
 
-## Next: Sprint 3 — the revenue layer (CEO-scoped)
+## Positioning (locked 2026-06-04, research pass 001)
 
-Trust-signal **scoring pipeline** (+ MCP secret-hygiene scan), embeddable
-**Verified-Agent badge** (`/agent/[slug]/badge`), and the **public Verify REST
-API** (`/api/v1/verify`) with API-key auth + `verification_calls` logging (the
-billing meter).
+**Verifiable agent IDENTITY — "SPF/DKIM for AI agents."** Open, self-checkable
+spec (domain control + Ed25519), charge the verifier. The 0–100 trust score is a
+**secondary enrichment signal**, not the pitch — the generic-score lane is
+already contested (mcp-trust.com, AgentAudit, et al.). The moat is the signed
+identity primitive + A2A-native verify + the embeddable live badge. See
+`RESEARCH.md` pass 001.
 
-### ESCALATE TO HUMAN (raised by the CEO agent)
-1. **Pricing + plan tiers** — PARKED until Sprint 4 (billing). The meter is built
-   in Sprint 3; price points are not needed to build it.
-2. **Secret-hygiene scan scope/liability** — ✅ HUMAN DECISION (2026-06-04):
-   **light active probing authorized.** Constraints the executor must honor:
-   probe ONLY domains an owner has claimed (consent via claiming); a small fixed
-   set of well-known paths (e.g. `/.env`, exposed manifests) on the claimed
-   domain only; gentle + rate-limited; reuse the SSRF-safe fetch; disclose the
-   hygiene scan in-product at claim time. Never probe unclaimed domains.
-3. **DNS-rebind hardening** — promote the v1 TOCTOU note to a tracked fix before
-   the Verify API is public at scale. (Technical — executor will handle in S3.)
+## Roadmap (post-research-001)
+
+- **Sprint 3 (in progress) — RESEQUENCED + AUGMENTED.** Lead with **badge +
+  Verify API + secret-hygiene**; trust score (module 1, shipped) rides along as
+  enrichment. **Added:** free public trust-report SEO/GEO pages (S-sized,
+  acquisition). DNS-rebind TOCTOU fix lands here (pre-public Verify API).
+- **Sprint 4 (elevated) — A2A-native JWS+JCS sign/verify** (the differentiation
+  moat; A2A proposal #1672 is open) + lightweight re-verify freshness webhooks +
+  **pricing/billing** (informed by design-partner price tests).
+- **Sprint 5 — ingest + enrich the official MCP Registry** (it explicitly
+  delegates trust downstream → that's us; supply + SEO engine).
+- **Sprint 6 — "verify before connect" MCP client/gateway SDK** (verifier-side
+  revenue compounds).
+- **Backlog:** sigstore/SLSA provenance enrichment.
+
+### ESCALATE TO HUMAN
+1. **Pricing approval** — research recommends (all $ are TEST-with-design-partners,
+   charge-the-verifier is firm): Free = unlimited claims + 1,000 verify calls/mo;
+   Pro **$29/mo**; Team/Business **$99/$199/mo**; metered **$0.005/call**. The meter
+   is built in S3; the **human approves the final numbers** (ideally after 3–5
+   design-partner calls). Full table + sources in `RESEARCH.md` pass 001.
+2. **Design-partner outreach** — needs human greenlight to reach out (founder
+   relationships) to validate the verify-call price.
+3. **A2A signing posture (S4)** — confirm we want to publicly align with / build
+   on A2A proposal #1672 before making it a headline feature (public positioning).
+4. **Secret-hygiene scan** — ✅ DECIDED (light active probing; claimed-domains-only,
+   fixed allowlist, gentle, SSRF-safe, disclosed). **DNS-rebind** — tracked
+   technical fix in S3 (executor owns).
