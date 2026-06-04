@@ -9,6 +9,7 @@ import {
   verifyDns,
   verifyWellKnown,
 } from "@/lib/verification/service";
+import { refreshRegistryPresence } from "@/lib/registry/ingest";
 
 export type ActionState = { error?: string; ok?: string } | null;
 
@@ -39,7 +40,10 @@ export async function verifyWellKnownAction(
   if (!agent) return { error: "Agent not found" };
 
   const result = await verifyWellKnown(agent.id, agent.domain);
-  if (result.valid) await runSecretHygieneScan(agent.id); // scan own claimed domain
+  if (result.valid) {
+    await runSecretHygieneScan(agent.id); // scan own claimed domain
+    await refreshRegistryPresence(agent.id); // MCP-registry presence signal
+  }
   revalidatePath(`/dashboard/agents/${id}`);
   revalidatePath(`/agent/${agent.slug}`);
   return result.valid

@@ -11,6 +11,9 @@ export default function Home() {
             passport<span className="text-muted-foreground">foragents</span>
           </Link>
           <nav className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/registry">Registry</Link>
+            </Button>
             <Show when="signed-out">
               <SignInButton mode="modal">
                 <Button variant="ghost" size="sm">
