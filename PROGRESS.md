@@ -120,9 +120,13 @@ API** (`/api/v1/verify`) with API-key auth + `verification_calls` logging (the
 billing meter).
 
 ### ESCALATE TO HUMAN (raised by the CEO agent)
-1. **Pricing + plan tiers** — needed before billing wires in (Sprint 4). Business call.
-2. **Secret-hygiene scan scope/liability** — scanning third-party endpoints for
-   leaked secrets has legal/ToS implications; confirm acceptable scope (declared
-   endpoints only, no aggressive crawling) before shipping that signal.
+1. **Pricing + plan tiers** — PARKED until Sprint 4 (billing). The meter is built
+   in Sprint 3; price points are not needed to build it.
+2. **Secret-hygiene scan scope/liability** — ✅ HUMAN DECISION (2026-06-04):
+   **light active probing authorized.** Constraints the executor must honor:
+   probe ONLY domains an owner has claimed (consent via claiming); a small fixed
+   set of well-known paths (e.g. `/.env`, exposed manifests) on the claimed
+   domain only; gentle + rate-limited; reuse the SSRF-safe fetch; disclose the
+   hygiene scan in-product at claim time. Never probe unclaimed domains.
 3. **DNS-rebind hardening** — promote the v1 TOCTOU note to a tracked fix before
-   the Verify API is public at scale. (Technical — executor will handle.)
+   the Verify API is public at scale. (Technical — executor will handle in S3.)
