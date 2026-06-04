@@ -1,4 +1,4 @@
-# AgentPassport
+# PassportForAgents
 
 **The verified-agent badge, trust API, and public registry for the open MCP / A2A ecosystem.**
 _Is this agent who it claims to be — and is it any good? Answered in one API call._

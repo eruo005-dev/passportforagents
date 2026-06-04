@@ -1,4 +1,4 @@
-# AgentPassport — Research Ledger
+# PassportForAgents — Research Ledger
 
 Findings from the standing research track (see `WORKING_AGREEMENT.md`).
 Produced by the `researcher` agent, vetted by the `reviewer`, triaged by the

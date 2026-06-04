@@ -12,7 +12,7 @@ export const SPEC_VERSION = "0.1.0" as const;
 export type AgentType = "mcp_server" | "a2a_agent";
 
 /** The signed body — every field EXCEPT `signature` is covered by the signature. */
-export interface AgentPassportBody {
+export interface PassportForAgentsBody {
   /** Spec version this document conforms to, e.g. "0.1.0". */
   spec_version: string;
   /** Human-readable agent name. */
@@ -34,7 +34,7 @@ export interface AgentPassportBody {
 }
 
 /** The full document = signed body + detached signature over its JCS form. */
-export interface AgentPassport extends AgentPassportBody {
+export interface PassportForAgents extends PassportForAgentsBody {
   /** Detached Ed25519 signature over the JCS-canonicalized body, base58btc multibase. */
   signature: string;
 }

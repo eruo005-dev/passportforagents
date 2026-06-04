@@ -13,9 +13,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const data = await getAgentBySlug(slug);
-  if (!data) return { title: "Agent not found — AgentPassport" };
+  if (!data) return { title: "Agent not found — PassportForAgents" };
   return {
-    title: `${data.agent.name} — AgentPassport`,
+    title: `${data.agent.name} — PassportForAgents`,
     description: `Verification status and identity for ${data.agent.name} (${data.agent.domain}).`,
   };
 }
@@ -73,7 +73,7 @@ export default async function PublicProfile({
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">
           <Link href="/" className="font-mono text-sm font-semibold tracking-tight">
-            agent<span className="text-muted-foreground">passport</span>
+            passport<span className="text-muted-foreground">foragents</span>
           </Link>
           <Link href="/spec" className="text-xs text-muted-foreground hover:underline">
             How verification works

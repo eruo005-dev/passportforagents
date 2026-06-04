@@ -10,7 +10,7 @@ import { bytesToHex } from "@noble/hashes/utils.js";
 import { generateKeyPair } from "../src/lib/crypto/ed25519";
 import { encodePublicKey } from "../src/lib/crypto/multibase";
 import { signPassport } from "../src/lib/passport/core";
-import { SPEC_VERSION, type AgentPassportBody } from "../src/lib/passport/types";
+import { SPEC_VERSION, type PassportForAgentsBody } from "../src/lib/passport/types";
 
 async function main() {
   const dir = "spec/fixtures";
@@ -18,7 +18,7 @@ async function main() {
 
   const { secretKey, publicKey } = generateKeyPair();
 
-  const body: AgentPassportBody = {
+  const body: PassportForAgentsBody = {
     spec_version: SPEC_VERSION,
     agent_name: "Example MCP Server",
     agent_type: "mcp_server",

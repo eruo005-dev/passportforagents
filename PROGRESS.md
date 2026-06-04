@@ -1,6 +1,6 @@
-# AgentPassport — Build Progress
+# PassportForAgents — Build Progress
 
-Working product name: **AgentPassport** (PassportForAgents.com).
+Working product name: **PassportForAgents** (PassportForAgents.com).
 Beachhead: verification + trust scoring for **MCP servers**.
 
 ---
@@ -22,7 +22,7 @@ standalone reference verifier.
   api_keys, verification_calls, registry_ingest`. Identity / registry /
   reputation kept cleanly separated so the identity primitive can be swapped
   later. Migration SQL checked in at `drizzle/0000_*.sql`.
-- **Auth:** Clerk (app "AgentPassport", GitHub + Email). `src/proxy.ts`
+- **Auth:** Clerk (app "PassportForAgents", GitHub + Email). `src/proxy.ts`
   (Next 16's renamed middleware) gates `/dashboard`. `ensureOwner()` upserts an
   `owners` row on first dashboard visit.
 - **Pages:** landing (`/`), `/sign-in`, `/sign-up`, protected `/dashboard`

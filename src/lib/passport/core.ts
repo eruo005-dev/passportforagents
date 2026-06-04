@@ -4,7 +4,7 @@
  * Pure and environment-agnostic: depends only on the crypto helpers and the
  * Web `fetch`/`URL` globals (present in Node 18+, edge runtimes, and browsers).
  * The hosted product AND the standalone reference verifier both import this —
- * one source of truth, zero dependence on any AgentPassport server.
+ * one source of truth, zero dependence on any PassportForAgents server.
  */
 import { sign as edSign, verify as edVerify } from "../crypto/ed25519";
 import { jcsCanonicalizeBytes } from "../crypto/jcs";
@@ -15,14 +15,14 @@ import {
   encodeSignature,
 } from "../crypto/multibase";
 import {
-  type AgentPassport,
-  type AgentPassportBody,
+  type PassportForAgents,
+  type PassportForAgentsBody,
   SIGNATURE_FIELD,
 } from "./types";
 
 /** Strip the signature field to obtain the exact bytes that get signed. */
 export function passportSigningBytes(
-  doc: AgentPassportBody | AgentPassport,
+  doc: PassportForAgentsBody | PassportForAgents,
 ): Uint8Array {
   const body: Record<string, unknown> = { ...doc };
   delete body[SIGNATURE_FIELD];
@@ -31,9 +31,9 @@ export function passportSigningBytes(
 
 /** Sign a passport body, returning the full document with `signature` attached. */
 export function signPassport(
-  body: AgentPassportBody,
+  body: PassportForAgentsBody,
   secretKey: Uint8Array,
-): AgentPassport {
+): PassportForAgents {
   const message = passportSigningBytes(body);
   const sig = edSign(message, secretKey);
   return { ...body, signature: encodeSignature(sig) };
@@ -62,7 +62,7 @@ export type VerifyResult = {
  *                       Pass null to skip the domain-match check (signature-only).
  */
 export function verifyPassport(
-  doc: AgentPassport,
+  doc: PassportForAgents,
   servedFromHost: string | null,
 ): VerifyResult {
   const checks = {
@@ -143,7 +143,7 @@ export function wellKnownUrl(domain: string): string {
 export type FetchAndVerifyResult = VerifyResult & {
   url: string;
   fetched: boolean;
-  document: AgentPassport | null;
+  document: PassportForAgents | null;
 };
 
 /**
@@ -161,7 +161,7 @@ export async function fetchAndVerify(
   const base = {
     url,
     fetched: false,
-    document: null as AgentPassport | null,
+    document: null as PassportForAgents | null,
     checks: {
       signature_valid: false,
       domain_matches: false,
@@ -184,9 +184,9 @@ export async function fetchAndVerify(
     return { ...base, valid: false, error: `HTTP ${res.status} fetching ${url}` };
   }
 
-  let doc: AgentPassport;
+  let doc: PassportForAgents;
   try {
-    doc = (await res.json()) as AgentPassport;
+    doc = (await res.json()) as PassportForAgents;
   } catch (e) {
     return {
       ...base,

@@ -1,5 +1,5 @@
 /**
- * AgentPassport database schema (Drizzle / PostgreSQL).
+ * PassportForAgents database schema (Drizzle / PostgreSQL).
  *
  * Design principle: keep IDENTITY (agents.public_key, verifications,
  * credentials), the REGISTRY ENTRY (agents, registry_ingest), and REPUTATION

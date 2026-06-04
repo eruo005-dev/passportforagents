@@ -36,7 +36,7 @@ export function renderBadgeSvg(opts: {
   score: number;
   label?: string;
 }): string {
-  const left = opts.label ?? "agentpassport";
+  const left = opts.label ?? "passportforagents";
   const right =
     opts.status === "unverified" || opts.status === "suspended"
       ? STATUS_LABEL[opts.status]

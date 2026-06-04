@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AgentPassport — the verified-agent badge & trust API",
+  title: "PassportForAgents — the verified-agent badge & trust API",
   description:
     "Is this agent who it claims to be, and is it any good? Verification, a trust score, and a public registry for the open MCP / A2A ecosystem.",
 };

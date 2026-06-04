@@ -8,7 +8,7 @@ export default function Home() {
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
           <Link href="/" className="font-mono text-sm font-semibold tracking-tight">
-            agent<span className="text-muted-foreground">passport</span>
+            passport<span className="text-muted-foreground">foragents</span>
           </Link>
           <nav className="flex items-center gap-3">
             <Show when="signed-out">
@@ -39,7 +39,7 @@ export default function Home() {
           Is this agent who it claims to be — and is it any good?
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-          AgentPassport answers both in one API call. Identity from domain
+          PassportForAgents answers both in one API call. Identity from domain
           control + an Ed25519-signed{" "}
           <code className="font-mono text-sm text-foreground">
             .well-known/agent-passport.json

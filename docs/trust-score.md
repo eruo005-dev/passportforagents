@@ -1,4 +1,4 @@
-# The AgentPassport Trust Score
+# The PassportForAgents Trust Score
 
 The trust score is a **transparent, documented weighted sum** of independently
 verified signals — never a black box, never self-reported vanity metrics. The

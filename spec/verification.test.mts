@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { fetchAndVerify, verifyPassport } from "../src/lib/passport/core";
-import type { AgentPassport } from "../src/lib/passport/types";
+import type { PassportForAgents } from "../src/lib/passport/types";
 import { checkDnsChallenge, expectedTxtRecord, matchesChallenge } from "../src/lib/verification/dns";
 import { readCapped } from "../src/lib/verification/safe-fetch";
 import { renderBadgeSvg, BADGE_CACHE_CONTROL } from "../src/lib/badge";
@@ -22,7 +22,7 @@ function streamingResponse(chunks: Uint8Array[]): Response {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const readFixture = (name: string): AgentPassport =>
+const readFixture = (name: string): PassportForAgents =>
   JSON.parse(readFileSync(join(here, "fixtures", name), "utf8"));
 
 const valid = readFixture("agent-passport.json");

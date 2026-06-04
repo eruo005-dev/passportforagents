@@ -23,7 +23,7 @@ export default async function AgentDetailPage({
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
   const profileUrl = `${appUrl}/agent/${agent.slug}`;
   const badgeUrl = `${profileUrl}/badge`;
-  const markdownSnippet = `[![AgentPassport](${badgeUrl})](${profileUrl})`;
+  const markdownSnippet = `[![PassportForAgents](${badgeUrl})](${profileUrl})`;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12">
@@ -112,7 +112,7 @@ export default async function AgentDetailPage({
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/agent/${agent.slug}/badge`} alt="AgentPassport badge" className="h-5" />
+          <img src={`/agent/${agent.slug}/badge`} alt="PassportForAgents badge" className="h-5" />
           <pre className="overflow-x-auto rounded-md border border-border bg-muted/40 p-3 font-mono text-xs">
             {markdownSnippet}
           </pre>

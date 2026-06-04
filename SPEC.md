@@ -11,7 +11,7 @@ and a signature check: **is this agent who it claims to be?**
 The trust model is deliberately the same one that already secures the web
 (TLS/DKIM): **control of a domain + a valid cryptographic signature = identity.**
 No blockchain, no DID method, no central registry is required to *verify* a
-passport. The hosted AgentPassport service is a convenience and reputation layer
+passport. The hosted PassportForAgents service is a convenience and reputation layer
 on top of this open primitive — not a dependency of it.
 
 ---
@@ -150,7 +150,7 @@ A passport that passes §4 end-to-end reaches at least `key_verified`.
 ## 6. Reference verifier
 
 A standalone, dependency-light reference verifier lives at `spec/verify.mts`.
-It has **zero dependence on the hosted AgentPassport service** — it only needs
+It has **zero dependence on the hosted PassportForAgents service** — it only needs
 the document (fetched live or from a file) plus audited crypto libraries
 (`@noble/ed25519`, `@noble/hashes`, `@scure/base`).
 

@@ -1,4 +1,4 @@
-# Working Agreement — the AgentPassport founding team
+# Working Agreement — the PassportForAgents founding team
 
 As of 2026-06-04 the build runs as a **self-driving founding team**. The human
 founder is out of the per-sprint loop; three roles carry the work:

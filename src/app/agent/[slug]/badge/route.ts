@@ -15,7 +15,7 @@ export async function GET(
   const data = await getAgentBySlug(slug);
 
   if (!data) {
-    const svg = renderBadgeSvg({ status: "unverified", score: 0, label: "agentpassport" });
+    const svg = renderBadgeSvg({ status: "unverified", score: 0, label: "passportforagents" });
     return new Response(svg, {
       status: 404,
       headers: {

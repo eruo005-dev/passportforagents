@@ -5,7 +5,7 @@ export default function SpecPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-16">
       <Link href="/" className="font-mono text-xs text-muted-foreground">
-        ← agentpassport
+        ← passportforagents
       </Link>
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">
         The Agent Passport spec

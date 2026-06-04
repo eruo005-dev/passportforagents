@@ -1,8 +1,8 @@
 #!/usr/bin/env -S npx tsx
 /**
- * AgentPassport — standalone reference verifier  (MIT-licensed)
+ * PassportForAgents — standalone reference verifier  (MIT-licensed)
  *
- * Verifies an Agent Passport with ZERO dependence on the hosted AgentPassport
+ * Verifies an Agent Passport with ZERO dependence on the hosted PassportForAgents
  * service. It only needs the document (fetched live from a domain, or a local
  * file) plus three small audited crypto libs (@noble, @scure, canonicalize).
  *
@@ -19,7 +19,7 @@ import {
   verifyPassport,
   type VerifyResult,
 } from "../src/lib/passport/core";
-import type { AgentPassport } from "../src/lib/passport/types";
+import type { PassportForAgents } from "../src/lib/passport/types";
 
 function arg(flag: string): string | undefined {
   const i = process.argv.indexOf(flag);
@@ -39,7 +39,7 @@ async function main() {
 
   if (filePath) {
     const raw = await readFile(filePath, "utf8");
-    const doc = JSON.parse(raw) as AgentPassport;
+    const doc = JSON.parse(raw) as PassportForAgents;
     console.log(`\nVerifying local file: ${filePath}`);
     console.log(`  agent_name:   ${doc.agent_name}`);
     console.log(`  owner_domain: ${doc.owner_domain}`);

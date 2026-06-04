@@ -4,7 +4,7 @@
  * We canonicalize the passport body BEFORE signing/verifying so that two
  * semantically-identical JSON documents always produce the same bytes (and
  * therefore the same signature). This is the SSL/DKIM-style trust primitive at
- * the heart of AgentPassport — see SPEC.md.
+ * the heart of PassportForAgents — see SPEC.md.
  *
  * Implementation notes (kept dependency-free on purpose):
  *  - Object members are sorted by their key's UTF-16 code units, which is
