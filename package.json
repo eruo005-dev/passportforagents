@@ -14,7 +14,8 @@
     "verify": "tsx spec/verify.mts",
     "fixture": "tsx spec/generate-fixture.mts",
     "test": "node --import tsx --conditions=react-server --test spec/verification.test.mts spec/trust-score.test.mts",
-    "test:integration": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/service.integration.test.mts"
+    "test:integration": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/service.integration.test.mts",
+    "test:integration:api": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/verify-api.integration.test.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.4.3",

@@ -15,6 +15,13 @@
       "when": 1780591171169,
       "tag": "0001_jittery_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780595302570,
+      "tag": "0002_past_blink",
+      "breakpoints": true
     }
   ]
 }

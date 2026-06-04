@@ -169,10 +169,16 @@ export const apiKeys = pgTable("api_keys", {
     .references(() => owners.id, { onDelete: "cascade" }),
   /** Only the hash of the key is stored; the plaintext is shown once at creation. */
   keyHash: text("key_hash").notNull().unique(),
+  /** Non-secret display prefix, e.g. "ap_live_a1b2…". */
+  keyPrefix: text("key_prefix").notNull(),
+  /** Optional human label. */
+  label: text("label"),
   scopes: jsonb("scopes").$type<string[]>().notNull().default([]),
   rateLimit: integer("rate_limit").notNull().default(1000),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  /** Soft-delete: revoked keys are rejected but preserved for call attribution. */
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
 });
 
 // ── verification_calls ────────────────────────────────────────────────────--

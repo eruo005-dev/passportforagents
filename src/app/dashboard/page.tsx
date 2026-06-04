@@ -29,9 +29,14 @@ export default async function DashboardPage() {
               Claim an MCP server and prove control of its domain.
             </p>
           </div>
-          <Button asChild>
-            <Link href="/dashboard/agents/new">+ Claim MCP server</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/dashboard/api-keys">API keys</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/agents/new">+ Claim MCP server</Link>
+            </Button>
+          </div>
         </div>
 
         {agents.length === 0 ? (
