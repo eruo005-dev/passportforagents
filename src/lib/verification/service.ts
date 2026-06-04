@@ -8,6 +8,7 @@ import { TRUST_WEIGHTS } from "@/lib/trust/weights";
 import { safeFetch } from "./safe-fetch";
 import { checkDnsChallenge, type DnsCheckResult } from "./dns";
 import { scanSecretHygiene } from "./secret-hygiene";
+import { fetchAndVerifyA2ACard } from "../a2a/fetch";
 
 const VERIFICATION_TTL_DAYS = 90;
 
@@ -134,6 +135,59 @@ export async function runSecretHygieneScan(
     checked: result.checked,
     findings: result.findings, // path + redacted reason only — never the value
   });
+  return result;
+}
+
+/**
+ * Fetch + verify an agent's A2A signed Agent Card and persist the outcome.
+ * On success the agent reaches `key_verified` as an `a2a_agent`, mirroring the
+ * card's skills as capabilities. Flows into the existing trust score + Verify
+ * API with no scoring changes. `fetchImpl` injectable for tests.
+ */
+export async function verifyA2AForAgent(
+  agentId: string,
+  fetchImpl: (input: string, init?: RequestInit) => Promise<Response> = safeFetch,
+) {
+  const agent = await db.query.agents.findFirst({ where: eq(agents.id, agentId) });
+  if (!agent) return null;
+
+  const result = await fetchAndVerifyA2ACard(agent.domain, fetchImpl);
+
+  await db.insert(verifications).values({
+    agentId,
+    method: "a2a_card",
+    evidence: {
+      url: result.url,
+      checks: result.checks,
+      keyHost: result.keyHost,
+      spec: "a2a-v1.0.0",
+      error: result.error ?? null,
+    },
+    verifiedAt: result.valid ? new Date() : null,
+    expiresAt: result.valid ? expiry() : null,
+  });
+
+  if (result.valid && result.card) {
+    const skills = (result.card.skills ?? [])
+      .map((s) => s.id || s.name)
+      .filter(Boolean) as string[];
+    await db
+      .update(agents)
+      .set({
+        type: "a2a_agent",
+        status: "key_verified",
+        verifiedDomain: result.keyHost ?? agent.domain,
+        capabilities: skills,
+        homepageUrl: result.card.provider?.url ?? agent.homepageUrl ?? undefined,
+        lastSeenAt: new Date(),
+      })
+      .where(eq(agents.id, agentId));
+    await upsertTrustSignal(agentId, "domain_control", 1, { method: "a2a_card" });
+    await upsertTrustSignal(agentId, "signed_provenance", 1, { a2a: true });
+  } else {
+    await db.update(agents).set({ lastSeenAt: new Date() }).where(eq(agents.id, agentId));
+  }
+
   return result;
 }
 

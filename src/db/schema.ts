@@ -35,6 +35,7 @@ export const verificationMethodEnum = pgEnum("verification_method", [
   "dns_txt",
   "well_known",
   "github",
+  "a2a_card",
 ]);
 export const trustSignalTypeEnum = pgEnum("trust_signal_type", [
   "domain_control",
