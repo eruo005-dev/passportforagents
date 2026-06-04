@@ -2,6 +2,10 @@
  * PassportForAgents' own MCP server manifest, for self-listing in the official
  * MCP Registry (dogfood / distribution). PREP ONLY — publishing requires DNS/
  * namespace proof + registry credentials (human-gated). Validated by a test.
+ *
+ * NOTE: `remotes`/`packages` are intentionally omitted until a live MCP protocol
+ * endpoint exists — we must not advertise a connect target that isn't served.
+ * Add the `remotes` entry (and build the `/mcp` endpoint) BEFORE publishing.
  */
 export type McpManifest = {
   $schema: string;
@@ -21,7 +25,6 @@ export const MCP_SERVER_MANIFEST: McpManifest = {
   version: "0.1.0",
   repository: { url: "https://github.com/passportforagents/passportforagents", source: "github" },
   websiteUrl: "https://passportforagents.com",
-  remotes: [{ type: "streamable-http", url: "https://passportforagents.com/mcp" }],
 };
 
 /** Validate the manifest against the registry's required fields + a no-secrets guard. */

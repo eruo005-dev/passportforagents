@@ -4,6 +4,5 @@
   "description": "Verify whether an MCP or A2A agent is who it claims to be: identity (domain control + Ed25519), verification status, and a transparent 0–100 trust score.",
   "version": "0.1.0",
   "repository": { "url": "https://github.com/passportforagents/passportforagents", "source": "github" },
-  "websiteUrl": "https://passportforagents.com",
-  "remotes": [{ "type": "streamable-http", "url": "https://passportforagents.com/mcp" }]
+  "websiteUrl": "https://passportforagents.com"
 }
