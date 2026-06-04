@@ -31,6 +31,9 @@ export default async function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost">
+              <Link href="/dashboard/billing">Billing</Link>
+            </Button>
+            <Button asChild variant="ghost">
               <Link href="/dashboard/webhooks">Webhooks</Link>
             </Button>
             <Button asChild variant="outline">

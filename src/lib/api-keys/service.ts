@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { apiKeys, verificationCalls } from "@/db/schema";
+import { apiKeys, owners, verificationCalls } from "@/db/schema";
 
 const KEY_PREFIX = "ap_live_";
 
@@ -65,14 +65,56 @@ function startOfUtcMonth(): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
 
-/** Count this owner's verify calls in the current UTC month (the meter). */
+/** Count this owner's BILLABLE (result=ok) verify calls in the current UTC month. */
 export async function monthlyUsage(ownerId: string): Promise<number> {
   const [row] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(verificationCalls)
     .innerJoin(apiKeys, eq(verificationCalls.apiKeyId, apiKeys.id))
-    .where(and(eq(apiKeys.ownerId, ownerId), gte(verificationCalls.calledAt, startOfUtcMonth())));
+    .where(
+      and(
+        eq(apiKeys.ownerId, ownerId),
+        gte(verificationCalls.calledAt, startOfUtcMonth()),
+        sql`${verificationCalls.result}->>'result' = 'ok'`,
+      ),
+    );
   return row?.count ?? 0;
+}
+
+/**
+ * ATOMIC quota grant: within one transaction, lock the owner row, count this
+ * month's billable calls, and insert the billable call ONLY if under quota.
+ * The per-owner FOR UPDATE lock serializes concurrent calls so two requests at
+ * `used = quota-1` can never both succeed (closes the TOCTOU). Returns true if
+ * the call was granted (and logged as the billable record), false if over quota.
+ */
+export async function grantBillableCall(
+  apiKeyId: string,
+  ownerId: string,
+  agentId: string | null,
+  result: Record<string, unknown>,
+  quota: number,
+): Promise<boolean> {
+  let granted = false;
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select 1 from owners where ${owners.id} = ${ownerId} for update`);
+    const [row] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(verificationCalls)
+      .innerJoin(apiKeys, eq(verificationCalls.apiKeyId, apiKeys.id))
+      .where(
+        and(
+          eq(apiKeys.ownerId, ownerId),
+          gte(verificationCalls.calledAt, startOfUtcMonth()),
+          sql`${verificationCalls.result}->>'result' = 'ok'`,
+        ),
+      );
+    if ((row?.count ?? 0) < quota) {
+      await tx.insert(verificationCalls).values({ apiKeyId, agentId, result });
+      granted = true;
+    }
+  });
+  return granted;
 }
 
 /** Log a billable verification call. */

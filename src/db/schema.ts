@@ -23,7 +23,7 @@ import {
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
-export const planTierEnum = pgEnum("plan_tier", ["free", "pro"]);
+export const planTierEnum = pgEnum("plan_tier", ["free", "pro", "team", "business"]);
 export const agentTypeEnum = pgEnum("agent_type", ["mcp_server", "a2a_agent"]);
 export const agentStatusEnum = pgEnum("agent_status", [
   "unverified",
