@@ -186,6 +186,36 @@ note (→ ships with public webhook docs).
 - **Backlog:** sigstore/SLSA provenance enrichment; quota TOCTOU note (folded
   into S4 billing); npm publish of the SDK (human-gated).
 
+## Sprint 7 — Uptime + reviews + dogfood ✅ (CEO: APPROVED 2026-06-05)
+
+Reviewer PASS (6/6 ACs). The **trust score is now fully live** — every signal
+feeds it (domain_control, signed_provenance, secret_hygiene, registry_presence,
+uptime, user_rating); no zeroed weights.
+- **uptime**: SSRF-safe health-probe cron (`/api/cron/uptime`, rolling window)
+  → uptime signal.
+- **reviews**: sybil-resistant verified-owner-only reviews (no self-review,
+  one-per-owner, server-enforced) → user_rating signal; review UI on profiles.
+- **dogfood**: our own signed `/.well-known/agent-passport.json` verifies under
+  the SDK (dev key; prod key human-gated).
+
+## BUILD STATE (2026-06-05): zero-human-input roadmap EXHAUSTED
+
+Sprints 1–7 ship a functionally complete, self-dogfooded product (~49 tests,
+build+lint clean throughout, every sprint Reviewer-gated). The CEO's call:
+building more pre-launch surface would be "motion, not progress." The team
+stops here until the founder unblocks the human-gated items.
+
+### Founder action list (leverage order)
+1. **Stripe** — account + keys + products/prices → unblocks Sprint 4-BILLING +
+   the atomic quota-meter fix. **Highest leverage; longest tail. Do first.**
+2. **Production self-signing key** for the dogfood passport (off the dev key).
+3. **Public-launch / Verify-API announcement GO** (date + channel).
+4. **`npm publish`** of `@passportforagents/verify` (flip `private:false`).
+5. **Design-partner outreach** — approve the target list + send (executor drafts).
+
+The self-driving loop (CEO · Reviewer · Researcher · executor) stays live and
+resumes the moment any gate is cleared.
+
 ### ESCALATE TO HUMAN — S4
 - **Live Stripe keys + account/ToS/tax setup** — human provisions the Stripe
   account, sets products/prices, supplies keys via env/secret store (never repo).
