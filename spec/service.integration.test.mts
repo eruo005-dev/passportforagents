@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { and, eq } from "drizzle-orm";
 import { closeDb, db } from "../src/db/index";
 import { agents, owners, trustSignals, verifications } from "../src/db/schema";
-import { pendingChallengeToken, verifyWellKnown } from "../src/lib/verification/service";
+import { pendingChallengeToken, runSecretHygieneScan, verifyWellKnown } from "../src/lib/verification/service";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const valid = JSON.parse(readFileSync(join(here, "fixtures", "agent-passport.json"), "utf8"));
@@ -83,6 +83,27 @@ test("DNS challenge token survives a well_known verification (token-poisoning re
   await verifyWellKnown(agent.id, "example.com", mockFetch(valid));
   const tok = await pendingChallengeToken(agent.id);
   assert.equal(tok, "claimtok123");
+});
+
+test("runSecretHygieneScan writes secret_hygiene signal (exposed=0, clean=1)", async () => {
+  const exposedAgent = await makeAgent("example.com");
+  const exposedFetch = async (url: string) =>
+    new URL(url).pathname === "/.env"
+      ? new Response("API_KEY=sk_live_leaked123456", { status: 200 })
+      : new Response("", { status: 404 });
+  await runSecretHygieneScan(exposedAgent.id, exposedFetch);
+  const exposedSig = await db.query.trustSignals.findMany({
+    where: and(eq(trustSignals.agentId, exposedAgent.id), eq(trustSignals.signalType, "secret_hygiene")),
+  });
+  assert.equal(exposedSig[0]?.value, 0, "exposed secret → 0");
+
+  const cleanAgent = await makeAgent("example.com");
+  const cleanFetch = async () => new Response("", { status: 404 });
+  await runSecretHygieneScan(cleanAgent.id, cleanFetch);
+  const cleanSig = await db.query.trustSignals.findMany({
+    where: and(eq(trustSignals.agentId, cleanAgent.id), eq(trustSignals.signalType, "secret_hygiene")),
+  });
+  assert.equal(cleanSig[0]?.value, 1, "clean scan → 1");
 });
 
 test("verifyWellKnown leaves status unverified for a tampered passport", async () => {

@@ -1,20 +1,23 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
+import { request as httpsRequest, type RequestOptions } from "node:https";
+import type { IncomingMessage } from "node:http";
+import { Readable } from "node:stream";
 import { isIP } from "node:net";
 
 /**
  * SSRF-hardened fetch for owner-supplied domains.
  *
- * The verification flow fetches a URL derived from a domain the *owner* types,
- * so it is an SSRF vector. Before fetching we resolve the host and refuse any
- * address in a private / loopback / link-local / reserved range. We also force
- * HTTPS, refuse redirects (an off-domain redirect would break the
+ * The verification + secret-hygiene flows fetch URLs derived from a domain the
+ * *owner* types, so they are SSRF vectors. Before connecting we resolve the host
+ * and refuse any address in a private/loopback/link-local/reserved range. We
+ * force HTTPS, refuse redirects (an off-domain redirect would break the
  * domain-control guarantee), bound the request with a timeout, and reject
- * oversized bodies.
+ * oversized bodies on actual streamed bytes.
  *
- * Note (v1): we check the resolved IP then fetch by hostname, so a determined
- * attacker could DNS-rebind between the two. Acceptable for v1; a future
- * hardening is to pin the vetted IP. Documented in PROGRESS.md.
+ * DNS-rebind (TOCTOU) is closed: we connect to the EXACT vetted IP via a pinned
+ * `lookup`, while TLS SNI + certificate validation still use the hostname — so
+ * a rebind between vetting and connecting cannot redirect us to a private host.
  */
 
 const FETCH_TIMEOUT_MS = 5000;
@@ -41,7 +44,6 @@ function ipIsBlocked(ip: string): boolean {
     if (ip6 === "::1" || ip6 === "::") return true; // loopback / unspecified
     if (ip6.startsWith("fe80")) return true; // link-local
     if (ip6.startsWith("fc") || ip6.startsWith("fd")) return true; // unique local fc00::/7
-    // IPv4-mapped (::ffff:a.b.c.d) → re-check the embedded v4.
     const mapped = ip6.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
     if (mapped) return ipIsBlocked(mapped[1]);
     return false;
@@ -51,19 +53,18 @@ function ipIsBlocked(ip: string): boolean {
 
 export class UnsafeUrlError extends Error {}
 
-/** A fetch implementation that vets the target before connecting. */
+/** A fetch implementation that vets + pins the target IP before connecting. */
 export async function safeFetch(
   input: string | URL,
   init?: RequestInit,
 ): Promise<Response> {
   const url = new URL(input.toString());
-
   if (url.protocol !== "https:") {
     throw new UnsafeUrlError("Only HTTPS URLs may be verified");
   }
 
-  // Resolve and vet every address the host maps to.
-  let addrs: { address: string }[];
+  // Resolve and vet every address the host maps to; pin the first vetted one.
+  let addrs: { address: string; family: number }[];
   try {
     addrs = await lookup(url.hostname, { all: true });
   } catch {
@@ -74,36 +75,61 @@ export async function safeFetch(
       `Refusing to fetch ${url.hostname}: resolves to a private or reserved address`,
     );
   }
+  const pinned = addrs[0];
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(url, {
-      ...init,
-      redirect: "error",
-      signal: controller.signal,
-    });
-
-    // Fast reject on an honest content-length…
-    const declared = Number(res.headers.get("content-length") ?? "0");
-    if (declared > MAX_BODY_BYTES) {
-      throw new UnsafeUrlError("agent-passport.json is too large");
+  const headers: Record<string, string> = { accept: "application/json" };
+  if (init?.headers) {
+    for (const [k, v] of Object.entries(init.headers as Record<string, string>)) {
+      headers[k] = v;
     }
-
-    // …but never trust it: enforce the cap on the actual streamed bytes so a
-    // chunked / lying server can't stream an unbounded body into memory.
-    const bytes = await readCapped(res, MAX_BODY_BYTES);
-    const body = new TextDecoder().decode(bytes);
-
-    // Re-wrap so callers (which call res.json()) get a normal Response.
-    return new Response(body, {
-      status: res.status,
-      statusText: res.statusText,
-      headers: res.headers,
-    });
-  } finally {
-    clearTimeout(timer);
   }
+
+  const options: RequestOptions = {
+    method: "GET",
+    servername: url.hostname, // SNI + cert validation use the hostname…
+    // …but the socket connects to the exact vetted IP (DNS-rebind closed).
+    lookup: (_hostname, _opts, cb) =>
+      cb(null, pinned.address, pinned.family as 4 | 6),
+    headers,
+    timeout: FETCH_TIMEOUT_MS,
+  };
+
+  const res = await new Promise<IncomingMessage>((resolve, reject) => {
+    const req = httpsRequest(url, options, resolve);
+    req.on("timeout", () => req.destroy(new UnsafeUrlError("request timed out")));
+    req.on("error", reject);
+    req.end();
+  });
+
+  const status = res.statusCode ?? 0;
+  if (status >= 300 && status < 400) {
+    res.destroy();
+    throw new UnsafeUrlError("redirects are not allowed during verification");
+  }
+
+  const declared = Number(res.headers["content-length"] ?? "0");
+  if (declared > MAX_BODY_BYTES) {
+    res.destroy();
+    throw new UnsafeUrlError("agent-passport.json is too large");
+  }
+
+  const outHeaders = new Headers();
+  for (const [k, v] of Object.entries(res.headers)) {
+    if (typeof v === "string") outHeaders.set(k, v);
+  }
+
+  // Reuse the streamed-byte cap via a web Response wrapper.
+  const webBody = Readable.toWeb(res) as unknown as ReadableStream<Uint8Array>;
+  const bytes = await readCapped(
+    new Response(webBody, { status, headers: outHeaders }),
+    MAX_BODY_BYTES,
+  );
+
+  return new Response(new TextDecoder().decode(bytes), {
+    status,
+    statusText: res.statusMessage,
+    headers: outHeaders,
+  });
 }
 
 /** Read a response body, aborting if it exceeds `max` bytes. Exported for tests. */

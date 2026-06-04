@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { claimAgent, getOwnedAgent } from "@/lib/agents";
 import {
   pendingChallengeToken,
+  runSecretHygieneScan,
   verifyDns,
   verifyWellKnown,
 } from "@/lib/verification/service";
@@ -38,6 +39,7 @@ export async function verifyWellKnownAction(
   if (!agent) return { error: "Agent not found" };
 
   const result = await verifyWellKnown(agent.id, agent.domain);
+  if (result.valid) await runSecretHygieneScan(agent.id); // scan own claimed domain
   revalidatePath(`/dashboard/agents/${id}`);
   revalidatePath(`/agent/${agent.slug}`);
   return result.valid
@@ -57,6 +59,7 @@ export async function verifyDnsAction(
   if (!token) return { error: "No challenge token found for this agent." };
 
   const result = await verifyDns(agent.id, agent.domain, token);
+  if (result.matched) await runSecretHygieneScan(agent.id); // scan own claimed domain
   revalidatePath(`/dashboard/agents/${id}`);
   revalidatePath(`/agent/${agent.slug}`);
   return result.matched

@@ -7,6 +7,7 @@ import { fetchAndVerify, type FetchAndVerifyResult } from "@/lib/passport/core";
 import { TRUST_WEIGHTS } from "@/lib/trust/weights";
 import { safeFetch } from "./safe-fetch";
 import { checkDnsChallenge, type DnsCheckResult } from "./dns";
+import { scanSecretHygiene } from "./secret-hygiene";
 
 const VERIFICATION_TTL_DAYS = 90;
 
@@ -112,6 +113,27 @@ export async function verifyWellKnown(
       .where(eq(agents.id, agentId));
   }
 
+  return result;
+}
+
+/**
+ * MCP secret-hygiene scan for an agent's OWN claimed domain (derived from the
+ * agent record — never a caller-supplied domain). Writes the `secret_hygiene`
+ * trust signal: clean = 1, exposed = 0. `fetchImpl` injectable for tests.
+ */
+export async function runSecretHygieneScan(
+  agentId: string,
+  fetchImpl: (input: string, init?: RequestInit) => Promise<Response> = safeFetch,
+) {
+  const agent = await db.query.agents.findFirst({ where: eq(agents.id, agentId) });
+  if (!agent) return null;
+  const domain = agent.verifiedDomain ?? agent.domain;
+
+  const result = await scanSecretHygiene(domain, fetchImpl);
+  await upsertTrustSignal(agentId, "secret_hygiene", result.exposed ? 0 : 1, {
+    checked: result.checked,
+    findings: result.findings, // path + redacted reason only — never the value
+  });
   return result;
 }
 

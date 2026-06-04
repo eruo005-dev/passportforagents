@@ -25,6 +25,13 @@ export default function NewAgentPage() {
         Claiming is free. You&apos;ll prove control of the domain in the next
         step.
       </p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        By claiming a domain you consent to a light secret-hygiene scan of a few
+        well-known paths on <em>that domain</em> (e.g.{" "}
+        <code className="font-mono">/.env</code>) to flag exposed secrets. We
+        record findings, never the secret values, and never scan domains you
+        haven&apos;t claimed.
+      </p>
 
       <Card className="mt-6">
         <CardHeader>

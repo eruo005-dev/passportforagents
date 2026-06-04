@@ -8,6 +8,7 @@ import type { AgentPassport } from "../src/lib/passport/types";
 import { checkDnsChallenge, expectedTxtRecord, matchesChallenge } from "../src/lib/verification/dns";
 import { readCapped } from "../src/lib/verification/safe-fetch";
 import { renderBadgeSvg, BADGE_CACHE_CONTROL } from "../src/lib/badge";
+import { PROBE_PATHS, looksSecret, scanSecretHygiene } from "../src/lib/verification/secret-hygiene";
 
 // Build a Response whose body streams `chunks` with NO content-length (chunked).
 function streamingResponse(chunks: Uint8Array[]): Response {
@@ -127,4 +128,54 @@ test("badge: unverified/suspended omit a score number", () => {
 test("badge: cache header is short-TTL public", () => {
   assert.match(BADGE_CACHE_CONTROL, /public/);
   assert.match(BADGE_CACHE_CONTROL, /max-age=300/);
+});
+
+// ── secret-hygiene scan (light active probing) ──────────────────────────────
+
+test("hygiene: looksSecret flags secret-shaped content, ignores clean", () => {
+  assert.ok(looksSecret("/.env", "API_KEY=sk_live_abcdef123456"));
+  assert.ok(looksSecret("/.env", "DATABASE_PASSWORD=hunter2"));
+  assert.ok(looksSecret("/config.json", "AKIAABCDEFGHIJKLMNOP"));
+  assert.ok(looksSecret("/.git/config", "[core]\n\trepositoryformatversion = 0"));
+  assert.equal(looksSecret("/.env", "# nothing secret here\nPORT=3000"), null);
+  assert.equal(looksSecret("/.git/config", "<html>not a git config</html>"), null);
+});
+
+function hygieneMock(byPath: Record<string, { status: number; body: string }>) {
+  const calls: string[] = [];
+  const fn = async (url: string) => {
+    calls.push(url);
+    const path = new URL(url).pathname;
+    const r = byPath[path];
+    return r
+      ? new Response(r.body, { status: r.status })
+      : new Response("", { status: 404 });
+  };
+  return { fn, calls };
+}
+
+test("hygiene: exposed /.env → finding; only the fixed allowlist is probed", async () => {
+  const { fn, calls } = hygieneMock({ "/.env": { status: 200, body: "SECRET_TOKEN=abc123xyz" } });
+  const r = await scanSecretHygiene("example.com", fn, { delayMs: 0 });
+  assert.equal(r.exposed, true);
+  assert.equal(r.findings[0].path, "/.env");
+  assert.ok(!JSON.stringify(r.findings).includes("abc123xyz"), "never stores the secret value");
+  // Exactly the allowlist paths were probed — caller cannot expand the set.
+  assert.equal(calls.length, PROBE_PATHS.length);
+  assert.deepEqual(
+    calls.map((u) => new URL(u).pathname).sort(),
+    [...PROBE_PATHS].sort(),
+  );
+});
+
+test("hygiene: all paths 404 → clean (not exposed), all allowlist paths checked", async () => {
+  const { fn } = hygieneMock({});
+  const r = await scanSecretHygiene("example.com", fn, { delayMs: 0 });
+  assert.equal(r.exposed, false);
+  assert.deepEqual(r.checked.sort(), [...PROBE_PATHS].sort());
+});
+
+test("hygiene: allowlist is a small fixed set", () => {
+  assert.ok(PROBE_PATHS.length > 0 && PROBE_PATHS.length <= 6);
+  assert.ok(PROBE_PATHS.every((p) => p.startsWith("/")));
 });
