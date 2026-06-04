@@ -20,6 +20,11 @@ export default async function AgentDetailPage({
   const token = (await pendingChallengeToken(agent.id)) ?? "";
   const wellKnownUrl = `https://${agent.domain}/.well-known/agent-passport.json`;
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const profileUrl = `${appUrl}/agent/${agent.slug}`;
+  const badgeUrl = `${profileUrl}/badge`;
+  const markdownSnippet = `[![AgentPassport](${badgeUrl})](${profileUrl})`;
+
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12">
       <Link href="/dashboard" className="font-mono text-xs text-muted-foreground">
@@ -91,6 +96,26 @@ export default async function AgentDetailPage({
             {expectedTxtRecord(token)}
           </pre>
           <DnsVerify agentId={agent.id} />
+        </CardContent>
+      </Card>
+
+      <h2 className="mt-10 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        Embed your badge
+      </h2>
+      <Card className="mt-3">
+        <CardHeader>
+          <CardTitle className="text-base">Verified-Agent badge</CardTitle>
+          <CardDescription>
+            A live, cacheable SVG that reflects current status + trust score and
+            links back to your public profile. Drop it in your README.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/agent/${agent.slug}/badge`} alt="AgentPassport badge" className="h-5" />
+          <pre className="overflow-x-auto rounded-md border border-border bg-muted/40 p-3 font-mono text-xs">
+            {markdownSnippet}
+          </pre>
         </CardContent>
       </Card>
 

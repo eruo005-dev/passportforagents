@@ -136,16 +136,17 @@ identity primitive + A2A-native verify + the embeddable live badge. See
   revenue compounds).
 - **Backlog:** sigstore/SLSA provenance enrichment.
 
-### ESCALATE TO HUMAN
-1. **Pricing approval** — research recommends (all $ are TEST-with-design-partners,
-   charge-the-verifier is firm): Free = unlimited claims + 1,000 verify calls/mo;
-   Pro **$29/mo**; Team/Business **$99/$199/mo**; metered **$0.005/call**. The meter
-   is built in S3; the **human approves the final numbers** (ideally after 3–5
-   design-partner calls). Full table + sources in `RESEARCH.md` pass 001.
-2. **Design-partner outreach** — needs human greenlight to reach out (founder
-   relationships) to validate the verify-call price.
-3. **A2A signing posture (S4)** — confirm we want to publicly align with / build
-   on A2A proposal #1672 before making it a headline feature (public positioning).
+### ESCALATE TO HUMAN — ✅ ALL GREENLIT (2026-06-04)
+1. **Pricing** — ✅ APPROVED as the model to build toward: Free = unlimited claims
+   + 1,000 verify calls/mo; Pro **$29/mo**; Team/Business **$99/$199/mo**; metered
+   **$0.005/call**. Numbers to be validated with design partners before we actually
+   charge; charge-the-verifier model firm. (Wiring live Stripe/charging customers
+   is still a human-authorized action at S4 billing.)
+2. **Design-partner outreach** — ✅ APPROVED. Executor drafts the target list +
+   outreach copy; the **human sends** the messages (no auto-send on their behalf).
+3. **A2A posture (S4)** — ✅ APPROVED to build on / align with proposal #1672 as a
+   headline feature. Internal build proceeds; any *public* spec contribution/post
+   still surfaces to the human (publish guardrail).
 4. **Secret-hygiene scan** — ✅ DECIDED (light active probing; claimed-domains-only,
    fixed allowlist, gentle, SSRF-safe, disclosed). **DNS-rebind** — tracked
    technical fix in S3 (executor owns).

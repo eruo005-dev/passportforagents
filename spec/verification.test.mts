@@ -7,6 +7,7 @@ import { fetchAndVerify, verifyPassport } from "../src/lib/passport/core";
 import type { AgentPassport } from "../src/lib/passport/types";
 import { checkDnsChallenge, expectedTxtRecord, matchesChallenge } from "../src/lib/verification/dns";
 import { readCapped } from "../src/lib/verification/safe-fetch";
+import { renderBadgeSvg, BADGE_CACHE_CONTROL } from "../src/lib/badge";
 
 // Build a Response whose body streams `chunks` with NO content-length (chunked).
 function streamingResponse(chunks: Uint8Array[]): Response {
@@ -104,4 +105,26 @@ test("safe-fetch: readCapped rejects an oversized chunked body (no content-lengt
     () => readCapped(streamingResponse(chunks), max),
     /too large/,
   );
+});
+
+// ── embeddable badge ─────────────────────────────────────────────────────---
+
+test("badge: key_verified shows status + score in a valid SVG", () => {
+  const svg = renderBadgeSvg({ status: "key_verified", score: 50 });
+  assert.match(svg, /^<svg[\s>]/);
+  assert.match(svg, /key-verified/);
+  assert.match(svg, /50/);
+  assert.match(svg, /role="img"/);
+});
+
+test("badge: unverified/suspended omit a score number", () => {
+  const svg = renderBadgeSvg({ status: "unverified", score: 0 });
+  assert.match(svg, /unverified/);
+  // No " · <score>" segment for unverified.
+  assert.doesNotMatch(svg, /·/);
+});
+
+test("badge: cache header is short-TTL public", () => {
+  assert.match(BADGE_CACHE_CONTROL, /public/);
+  assert.match(BADGE_CACHE_CONTROL, /max-age=300/);
 });

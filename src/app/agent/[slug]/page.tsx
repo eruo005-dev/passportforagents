@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAgentBySlug } from "@/lib/agents";
+import { loadTrustScore } from "@/lib/trust/load";
 import { VerificationBadge, type AgentStatus } from "@/components/verification-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -35,6 +36,8 @@ export default async function PublicProfile({
   const { agent, verifications } = data;
 
   const lastVerified = verifications.find((v) => v.verifiedAt)?.verifiedAt ?? null;
+  const trust = await loadTrustScore(agent.id);
+  const activeSignals = trust.breakdown.filter((r) => r.value > 0);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -114,6 +117,53 @@ export default async function PublicProfile({
             </CardContent>
           </Card>
         </dl>
+
+        {/* Transparent trust score — a documented weighted sum, never a black box. */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="flex items-baseline justify-between text-xs uppercase tracking-wide text-muted-foreground">
+              <span>Trust score</span>
+              <span className="font-mono text-2xl font-semibold text-foreground">
+                {trust.score}
+                <span className="text-sm text-muted-foreground">/100</span>
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {activeSignals.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No verified signals yet. Self-asserted claims carry zero weight
+                until independently checked.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {trust.breakdown.map((r) => (
+                  <li key={r.signalType} className="flex items-center gap-3 text-sm">
+                    <span className="w-40 shrink-0 font-mono text-xs text-muted-foreground">
+                      {r.signalType}
+                    </span>
+                    <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                      <span
+                        className="absolute inset-y-0 left-0 rounded-full bg-success"
+                        style={{ width: `${Math.round(r.value * 100)}%` }}
+                      />
+                    </span>
+                    <span className="w-14 shrink-0 text-right font-mono text-xs text-muted-foreground">
+                      +{Math.round(r.contribution * 100)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="mt-4 text-xs text-muted-foreground">
+              Transparent weighted sum of independently verified signals.{" "}
+              <Link href="/spec" className="underline">
+                How it&apos;s computed
+              </Link>
+              .
+            </p>
+          </CardContent>
+        </Card>
 
         {(agent.homepageUrl || agent.repoUrl) && (
           <div className="mt-6 flex gap-4 text-sm">
