@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgentPassport
 
-## Getting Started
+**The verified-agent badge, trust API, and public registry for the open MCP / A2A ecosystem.**
+_Is this agent who it claims to be — and is it any good? Answered in one API call._
 
-First, run the development server:
+Identity is established the same way the web already does it: **control of a
+domain + an Ed25519-signed JSON document**. No blockchain, no DID method, no
+central authority required to verify. See [`SPEC.md`](./SPEC.md).
+
+---
+
+## Stack
+
+| Layer     | Choice                                                      |
+| --------- | ----------------------------------------------------------- |
+| Framework | Next.js 16 (App Router, TypeScript, Turbopack)              |
+| Database  | Supabase Postgres + Drizzle ORM (migrations in repo)        |
+| Auth      | Clerk (GitHub + Email)                                      |
+| Crypto    | `@noble/ed25519` + `@noble/hashes`, RFC 8785 JCS, multibase |
+| UI        | Tailwind v4 + shadcn/ui (dark default)                      |
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in Supabase + Clerk keys
+npm run db:migrate           # apply schema to your database
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## The open spec & reference verifier
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The `.well-known/agent-passport.json` schema and a standalone verifier are
+MIT-licensed and have **zero dependence on the hosted service**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run fixture                                                   # generate a signed sample
+npm run verify -- --file spec/fixtures/agent-passport.json --host example.com   # ✓ VALID
+npm run verify -- example.com                                     # verify a live domain
+```
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script             | Purpose                                  |
+| ------------------ | ---------------------------------------- |
+| `npm run dev`      | Dev server                               |
+| `npm run build`    | Production build                         |
+| `npm run db:generate` | Generate migration SQL from schema    |
+| `npm run db:migrate`  | Apply migrations (direct `:5432` conn) |
+| `npm run db:studio`   | Drizzle Studio                         |
+| `npm run verify`   | Run the reference verifier               |
+| `npm run fixture`  | Generate signed/tampered test fixtures   |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/                 # routes: /, /sign-in, /sign-up, /dashboard, /spec
+  components/ui/        # shadcn primitives
+  db/                   # Drizzle schema + client
+  lib/
+    crypto/             # ed25519, JCS, multibase
+    passport/           # passport types + shared sign/verify core
+  proxy.ts              # Clerk auth gate (Next 16's renamed middleware)
+spec/
+  verify.mts            # standalone reference verifier (MIT)
+  generate-fixture.mts  # signed fixture generator
+drizzle/                # checked-in migration SQL
+SPEC.md                 # the open spec
+PROGRESS.md             # build log
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Progress is tracked in [`PROGRESS.md`](./PROGRESS.md). License: [MIT](./LICENSE).
