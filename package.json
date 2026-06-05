@@ -13,7 +13,7 @@
     "db:studio": "drizzle-kit studio",
     "verify": "tsx spec/verify.mts",
     "fixture": "tsx spec/generate-fixture.mts",
-    "test": "node --import tsx --conditions=react-server --test spec/verification.test.mts spec/trust-score.test.mts spec/a2a.test.mts spec/webhooks.test.mts spec/registry.test.mts spec/sdk.test.mts spec/uptime.test.mts spec/billing.test.mts spec/mcp.test.mts spec/subagents.test.mts",
+    "test": "node --import tsx --conditions=react-server --test spec/verification.test.mts spec/trust-score.test.mts spec/a2a.test.mts spec/webhooks.test.mts spec/registry.test.mts spec/sdk.test.mts spec/uptime.test.mts spec/billing.test.mts spec/mcp.test.mts spec/subagents.test.mts spec/trust-attestation.test.mts",
     "test:integration": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/service.integration.test.mts",
     "test:integration:api": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/verify-api.integration.test.mts",
     "test:integration:a2a": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/a2a.integration.test.mts",
