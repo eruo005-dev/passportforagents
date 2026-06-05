@@ -7,8 +7,9 @@
  * (today: domain control + Ed25519) can later be swapped (JWT → VC → on-chain)
  * without touching the registry or reputation layers.
  */
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   integer,
   jsonb,
@@ -71,9 +72,17 @@ export const agents = pgTable("agents", {
   type: agentTypeEnum("type").notNull().default("mcp_server"),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
+  /** Stable public Agent ID ("agt_" + base32). Resolvable by API/badge/profile.
+   *  App sets a crockford-base32 id; the DB default backstops any direct insert. */
+  publicId: text("public_id")
+    .notNull()
+    .unique()
+    .default(sql`'agt_' || substr(md5(random()::text), 1, 12)`),
   description: text("description"),
   /** The domain the owner claims to control (set at claim time). */
   domain: text("domain").notNull(),
+  /** The verified domain this agent is registered under (sub-agents). */
+  domainId: uuid("domain_id").references((): AnyPgColumn => domains.id, { onDelete: "set null" }),
   homepageUrl: text("homepage_url"),
   repoUrl: text("repo_url"),
   /** Set once domain control is proven; may differ from `domain` in edge cases. */
@@ -88,6 +97,26 @@ export const agents = pgTable("agents", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
 });
+
+// ── domains ──────────────────────────────────────────────────────────────---
+// First-class verified domains. An owner verifies a domain ONCE; many agents
+// register under it and inherit its status (per-agent identities, Sprint 9).
+
+export const domains = pgTable(
+  "domains",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => owners.id, { onDelete: "cascade" }),
+    domain: text("domain").notNull(),
+    status: agentStatusEnum("status").notNull().default("unverified"),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    evidence: jsonb("evidence"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique("uq_domain_owner").on(t.ownerId, t.domain)],
+);
 
 // ── verifications ─────────────────────────────────────────────────────────--
 // Re-checkable, expirable evidence that a verification method succeeded.

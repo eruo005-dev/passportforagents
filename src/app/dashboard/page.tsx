@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { ensureOwner } from "@/lib/owners";
-import { listOwnerAgents } from "@/lib/agents";
+import { listOwnerAgents, listOwnerDomains } from "@/lib/agents";
+import { RegisterSubAgent, type VerifiedDomain } from "./register-subagent";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge, type AgentStatus } from "@/components/verification-badge";
 
 export default async function DashboardPage() {
   const owner = await ensureOwner();
   const agents = await listOwnerAgents();
+  const verifiedDomains = (await listOwnerDomains()).filter(
+    (d) => d.status !== "unverified",
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -67,7 +71,7 @@ export default async function DashboardPage() {
                     {a.name}
                   </Link>
                   <p className="truncate font-mono text-xs text-muted-foreground">
-                    {a.domain} · /agent/{a.slug}
+                    {a.publicId} · {a.domain} · /agent/{a.slug}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
@@ -80,6 +84,8 @@ export default async function DashboardPage() {
             ))}
           </ul>
         )}
+
+        <RegisterSubAgent domains={verifiedDomains as VerifiedDomain[]} />
       </main>
     </div>
   );

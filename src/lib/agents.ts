@@ -1,11 +1,15 @@
 import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { agents, verifications } from "@/db/schema";
+import { agents, domains, verifications } from "@/db/schema";
 import { ensureOwner } from "@/lib/owners";
 import { baseSlug, uniqueSlug } from "@/lib/slug";
 import { generateChallengeToken } from "@/lib/verification/service";
+import { generateAgentPublicId } from "@/lib/ids";
+import { createSubAgentForOwner } from "@/lib/domains";
 import { normalizeHost } from "@/lib/passport/core";
+
+export { createSubAgentForOwner };
 
 export type ClaimInput = {
   name: string;
@@ -47,6 +51,7 @@ export async function claimAgent(input: ClaimInput) {
           type: "mcp_server",
           name,
           slug,
+          publicId: generateAgentPublicId(),
           domain,
           description: input.description?.trim() || null,
           verifiedDomain: null,
@@ -69,6 +74,31 @@ export async function claimAgent(input: ClaimInput) {
   });
 
   return agent;
+}
+
+/**
+ * Register a sub-agent under one of the owner's VERIFIED domains. It inherits
+ * the domain's status (verified once → many agents inherit) and gets its own
+ * stable public Agent ID + slug + profile + badge.
+ */
+export async function registerSubAgent(input: {
+  domainId: string;
+  name: string;
+  capabilities?: string[];
+}) {
+  const owner = await ensureOwner();
+  if (!owner) throw new Error("Not signed in");
+  return createSubAgentForOwner(owner.id, input);
+}
+
+/** Verified domains the current owner can register agents under. */
+export async function listOwnerDomains() {
+  const owner = await ensureOwner();
+  if (!owner) return [];
+  return db.query.domains.findMany({
+    where: eq(domains.ownerId, owner.id),
+    orderBy: [desc(domains.createdAt)],
+  });
 }
 
 /** All agents owned by the current user. */

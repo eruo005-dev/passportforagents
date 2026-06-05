@@ -13,14 +13,15 @@
     "db:studio": "drizzle-kit studio",
     "verify": "tsx spec/verify.mts",
     "fixture": "tsx spec/generate-fixture.mts",
-    "test": "node --import tsx --conditions=react-server --test spec/verification.test.mts spec/trust-score.test.mts spec/a2a.test.mts spec/webhooks.test.mts spec/registry.test.mts spec/sdk.test.mts spec/uptime.test.mts spec/billing.test.mts spec/mcp.test.mts",
+    "test": "node --import tsx --conditions=react-server --test spec/verification.test.mts spec/trust-score.test.mts spec/a2a.test.mts spec/webhooks.test.mts spec/registry.test.mts spec/sdk.test.mts spec/uptime.test.mts spec/billing.test.mts spec/mcp.test.mts spec/subagents.test.mts",
     "test:integration": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/service.integration.test.mts",
     "test:integration:api": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/verify-api.integration.test.mts",
     "test:integration:a2a": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/a2a.integration.test.mts",
     "test:integration:webhooks": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/webhooks.integration.test.mts",
     "test:integration:registry": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/registry.integration.test.mts",
     "test:integration:uptime": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/uptime-reviews.integration.test.mts",
-    "test:integration:billing": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/billing.integration.test.mts"
+    "test:integration:billing": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/billing.integration.test.mts",
+    "test:integration:subagents": "node --import tsx --conditions=react-server --env-file=.env.local --test spec/subagents.integration.test.mts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.4.3",

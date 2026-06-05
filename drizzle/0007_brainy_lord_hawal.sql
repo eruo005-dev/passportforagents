@@ -1,0 +1,1 @@
+ALTER TABLE "agents" ALTER COLUMN "public_id" SET DEFAULT 'agt_' || substr(md5(random()::text), 1, 12);

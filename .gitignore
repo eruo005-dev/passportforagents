@@ -47,3 +47,6 @@ spec/fixtures/self-keypair.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agoramind showcase artifacts (private key must not be committed)
+agoramind-passport-key.SECRET.json

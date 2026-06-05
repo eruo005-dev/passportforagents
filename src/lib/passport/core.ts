@@ -17,6 +17,7 @@ import {
 import {
   type PassportForAgents,
   type PassportForAgentsBody,
+  type SubAgent,
   SIGNATURE_FIELD,
 } from "./types";
 
@@ -49,6 +50,9 @@ export type VerifyResult = {
   };
   /** Raw public key bytes if it parsed, else null. */
   publicKey: Uint8Array | null;
+  /** Sub-agents carried by the signed body — populated ONLY when the signature
+   *  verifies (spec 0.2.0+). Each is identity-anchored to the domain key. */
+  listedAgents?: SubAgent[];
   /** First failure reason, if any. */
   error?: string;
 };
@@ -115,6 +119,8 @@ export function verifyPassport(
     valid,
     checks,
     publicKey,
+    // Only trust the sub-agent list if the signature over the whole body verified.
+    listedAgents: checks.signature_valid ? (doc.agents ?? []) : undefined,
     error: valid
       ? undefined
       : !checks.signature_valid
@@ -123,6 +129,19 @@ export function verifyPassport(
           ? `domain mismatch: served from "${servedFromHost}" but owner_domain is "${doc.owner_domain}"`
           : undefined,
   };
+}
+
+/**
+ * Is `subAgentId` a key-verified sub-agent of this domain document? Re-derives
+ * identity from the signature EVERY time — a sub-agent is trusted only if (1) the
+ * domain doc's signature verifies and (2) the id is present in the signed
+ * `agents[]`. Tampering any byte of the body (incl. an `agents[]` entry) breaks
+ * the single signature → returns false for every entry. Never reads a stored flag.
+ */
+export function verifyListedAgent(doc: PassportForAgents, subAgentId: string): boolean {
+  const r = verifyPassport(doc, null); // signature-only; domain checked separately
+  if (!r.checks.signature_valid) return false;
+  return (r.listedAgents ?? []).some((a) => a.id === subAgentId);
 }
 
 /** Lower-case, strip a leading "www." and any port, for host comparison. */

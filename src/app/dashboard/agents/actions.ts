@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { claimAgent, getOwnedAgent } from "@/lib/agents";
+import { claimAgent, getOwnedAgent, registerSubAgent } from "@/lib/agents";
 import {
   pendingChallengeToken,
   runSecretHygieneScan,
@@ -10,6 +10,7 @@ import {
   verifyWellKnown,
 } from "@/lib/verification/service";
 import { refreshRegistryPresence } from "@/lib/registry/ingest";
+import { linkVerifiedDomain } from "@/lib/domains";
 
 export type ActionState = { error?: string; ok?: string } | null;
 
@@ -31,6 +32,27 @@ export async function claimAgentAction(
   redirect(`/dashboard/agents/${agentId}`);
 }
 
+export async function registerSubAgentAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const domainId = String(formData.get("domainId") ?? "");
+  const name = String(formData.get("name") ?? "");
+  const capabilities = String(formData.get("capabilities") ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  let agentId: string;
+  try {
+    const agent = await registerSubAgent({ domainId, name, capabilities });
+    agentId = agent.id;
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  revalidatePath("/dashboard");
+  redirect(`/dashboard/agents/${agentId}`);
+}
+
 export async function verifyWellKnownAction(
   _prev: ActionState,
   formData: FormData,
@@ -43,6 +65,7 @@ export async function verifyWellKnownAction(
   if (result.valid) {
     await runSecretHygieneScan(agent.id); // scan own claimed domain
     await refreshRegistryPresence(agent.id); // MCP-registry presence signal
+    await linkVerifiedDomain(agent.id); // promote to a first-class verified domain
   }
   revalidatePath(`/dashboard/agents/${id}`);
   revalidatePath(`/agent/${agent.slug}`);
@@ -63,7 +86,10 @@ export async function verifyDnsAction(
   if (!token) return { error: "No challenge token found for this agent." };
 
   const result = await verifyDns(agent.id, agent.domain, token);
-  if (result.matched) await runSecretHygieneScan(agent.id); // scan own claimed domain
+  if (result.matched) {
+    await runSecretHygieneScan(agent.id); // scan own claimed domain
+    await linkVerifiedDomain(agent.id); // promote to a first-class verified domain
+  }
   revalidatePath(`/dashboard/agents/${id}`);
   revalidatePath(`/agent/${agent.slug}`);
   return result.matched

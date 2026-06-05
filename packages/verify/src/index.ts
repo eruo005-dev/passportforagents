@@ -14,6 +14,9 @@
 import { decodePublicKey, decodeSignature } from "./base58.js";
 import { jcsBytes } from "./jcs.js";
 
+/** A sub-agent operated under the domain (spec 0.2.0+), signed by the domain key. */
+export type SubAgent = { id: string; name: string; capabilities: string[]; public_key?: string };
+
 export type AgentPassport = {
   spec_version: string;
   agent_name: string;
@@ -23,6 +26,8 @@ export type AgentPassport = {
   capabilities: string[];
   homepage?: string;
   repo?: string;
+  /** Sub-agents under this domain (spec 0.2.0+) — covered by the signature. */
+  agents?: SubAgent[];
   issued_at: string;
   signature: string;
 };
@@ -31,6 +36,8 @@ export type StandaloneResult = {
   valid: boolean;
   checks: { signature_valid: boolean; domain_matches: boolean; public_key_wellformed: boolean };
   document: AgentPassport | null;
+  /** Sub-agents carried by the signed body — present ONLY when the signature verified. */
+  listedAgents?: SubAgent[];
   error?: string;
 };
 
@@ -85,12 +92,25 @@ export async function verifyPassport(
     valid,
     checks,
     document: doc,
+    // Only trust the sub-agent list once the body signature has verified.
+    listedAgents: checks.signature_valid ? (doc.agents ?? []) : undefined,
     error: valid
       ? undefined
       : !checks.signature_valid
         ? "signature did not verify"
         : "domain mismatch",
   };
+}
+
+/**
+ * Is `subAgentId` a key-verified sub-agent of this domain document? Re-derives
+ * identity from the signature every call: true only if the body signature
+ * verifies AND the id is in the signed `agents[]`. Tampering fails closed.
+ */
+export async function verifyListedAgent(doc: AgentPassport, subAgentId: string): Promise<boolean> {
+  const r = await verifyPassport(doc, null);
+  if (!r.checks.signature_valid) return false;
+  return (r.listedAgents ?? []).some((a) => a.id === subAgentId);
 }
 
 /** Fetch a domain's passport over HTTPS and verify it end-to-end. */

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { agents, owners } from "@/db/schema";
 import { loadTrustScore } from "@/lib/trust/load";
 import { normalizeHost } from "@/lib/passport/core";
+import { isAgentPublicId } from "@/lib/ids";
 import { quotaForPlan, PLAN_QUOTAS } from "@/lib/billing/plans";
 import {
   authenticateApiKey,
@@ -16,9 +17,13 @@ export const FREE_VERIFY_QUOTA = PLAN_QUOTAS.free;
 
 export type VerifyApiResult = { status: number; body: Record<string, unknown> };
 
-/** Resolve an agent by slug, id, or claimed/verified domain. */
+/** Resolve an agent by public Agent ID (agt_…), slug, or claimed/verified domain. */
 async function findAgentForApi(query: string) {
   const q = query.trim();
+  if (isAgentPublicId(q)) {
+    const byId = await db.query.agents.findFirst({ where: eq(agents.publicId, q) });
+    return byId ?? null;
+  }
   const bySlug = await db.query.agents.findFirst({ where: eq(agents.slug, q) });
   if (bySlug) return bySlug;
   const host = normalizeHost(q);
@@ -80,6 +85,7 @@ export async function runVerify(args: {
 
   const body = {
     agent: {
+      id: agent.publicId,
       slug: agent.slug,
       name: agent.name,
       type: agent.type,

@@ -31,6 +31,10 @@ function printChecks(r: VerifyResult) {
   console.log(`  ${mark(r.checks.public_key_wellformed)} public key well-formed (ed25519 Multikey)`);
   console.log(`  ${mark(r.checks.signature_valid)} signature verifies over JCS-canonicalized body`);
   console.log(`  ${mark(r.checks.domain_matches)} serving host matches owner_domain`);
+  if (r.listedAgents && r.listedAgents.length > 0) {
+    console.log(`  ✓ ${r.listedAgents.length} signed sub-agent(s):`);
+    for (const a of r.listedAgents) console.log(`      · ${a.id} (${a.name})`);
+  }
 }
 
 async function main() {

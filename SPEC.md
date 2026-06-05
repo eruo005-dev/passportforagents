@@ -1,6 +1,6 @@
 # The Agent Passport Specification
 
-**Version:** `0.1.0`
+**Version:** `0.2.0` (verifiers accept `0.1.0` + `0.2.0`)
 **Status:** Draft
 **License:** MIT (see `LICENSE`)
 
@@ -54,6 +54,7 @@ tampered with.
 | `capabilities` | string[]   | yes      | Declared capabilities (e.g. MCP method names, tool names). May be empty.     |
 | `homepage`     | string     | no       | Project homepage URL.                                                        |
 | `repo`         | string     | no       | Source repository URL.                                                       |
+| `agents`       | object[]   | no       | Sub-agents operated under this domain (0.2.0+). Each `{ id, name, capabilities, public_key? }`. See §4.1. |
 | `issued_at`    | string     | yes      | RFC 3339 timestamp of issuance/signing.                                      |
 | `signature`    | string     | yes      | Detached signature over the JCS-canonicalized body (see §4). **Excluded from the signed bytes.** |
 
@@ -131,6 +132,32 @@ The signature covers **every field except `signature`**.
 
 A verifier MUST refuse off-domain redirects when fetching the document — a
 redirect to another host would break the domain-control guarantee.
+
+### 4.1 Sub-agents (spec 0.2.0+)
+
+A domain that operates multiple agents MAY list them in the optional `agents`
+array inside the **signed body**:
+
+```json
+"agents": [
+  { "id": "the_ethicist", "name": "The Ethicist", "capabilities": ["debate"] },
+  { "id": "the_provocateur", "name": "The Provocateur", "capabilities": ["debate"] }
+]
+```
+
+Because the array lives inside the body, the single Ed25519 signature covers it.
+Each listed sub-agent's identity is therefore **cryptographically anchored to the
+domain key** — per-agent identity with **no per-agent key and no DID**.
+
+A verifier accepts sub-agent `X` as identity-verified iff (1) the document's
+top-level signature verifies against `public_key`, AND (2) an entry with
+`id == X` is present in the signed `agents`. **Tampering any byte of an `agents`
+entry (or appending an unlisted one after signing) breaks the single signature →
+every listed sub-agent fails closed.** A sub-agent identifier is domain-scoped
+(unique within `owner_domain`).
+
+This is additive: `agents` is omitted in `0.1.0` documents, which verify
+unchanged.
 
 ---
 

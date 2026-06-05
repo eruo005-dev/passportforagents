@@ -113,6 +113,10 @@ export default async function PublicProfile({
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div>
+                <span className="text-muted-foreground">Agent ID: </span>
+                <span className="font-mono text-xs">{agent.publicId}</span>
+              </div>
+              <div>
                 <span className="text-muted-foreground">Owner domain: </span>
                 <span className="font-mono">{agent.verifiedDomain ?? agent.domain}</span>
               </div>

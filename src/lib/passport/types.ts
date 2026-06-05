@@ -7,9 +7,26 @@
  * copied into a standalone verifier.
  */
 
-export const SPEC_VERSION = "0.1.0" as const;
+export const SPEC_VERSION = "0.2.0" as const;
+/** Versions this library accepts (additive minor bumps stay compatible). */
+export const SUPPORTED_SPEC_VERSIONS = ["0.1.0", "0.2.0"] as const;
 
 export type AgentType = "mcp_server" | "a2a_agent";
+
+/**
+ * A sub-agent operated under the owner_domain (spec 0.2.0+). Because this lives
+ * inside the signed body, every listed sub-agent's identity is cryptographically
+ * carried by the domain's single Ed25519 signature — per-agent identity with no
+ * per-agent key and no DID. `public_key` is optional (a sub-agent MAY also carry
+ * its own key) but identity does not require it.
+ */
+export interface SubAgent {
+  /** Stable, domain-scoped identifier for this sub-agent (e.g. "the_ethicist"). */
+  id: string;
+  name: string;
+  capabilities: string[];
+  public_key?: string;
+}
 
 /** The signed body — every field EXCEPT `signature` is covered by the signature. */
 export interface PassportForAgentsBody {
@@ -29,6 +46,9 @@ export interface PassportForAgentsBody {
   homepage?: string;
   /** Source repository URL. */
   repo?: string;
+  /** Sub-agents operated under this domain (spec 0.2.0+). Signed → each is
+   *  identity-anchored to the domain key. Optional + additive; absent in 0.1.0. */
+  agents?: SubAgent[];
   /** RFC 3339 timestamp of when this document was issued/signed. */
   issued_at: string;
 }

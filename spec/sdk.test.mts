@@ -7,9 +7,14 @@ import {
   verifyStandalone,
   verifyPassport,
   verifyHosted,
+  verifyListedAgent,
   type AgentPassport,
 } from "../packages/verify/src/index";
 import { base58decode } from "../packages/verify/src/base58";
+import { generateKeyPair } from "../src/lib/crypto/ed25519";
+import { encodePublicKey } from "../src/lib/crypto/multibase";
+import { signPassport } from "../src/lib/passport/core";
+import type { PassportForAgentsBody } from "../src/lib/passport/types";
 
 test("sdk: base58decode handles leading-zero + empty exactly", () => {
   assert.deepEqual([...base58decode("")], []);
@@ -27,6 +32,30 @@ const tampered = read("agent-passport.tampered.json");
 
 const serve = (doc: unknown) => async () =>
   new Response(JSON.stringify(doc), { status: 200, headers: { "content-type": "application/json" } });
+
+test("sdk: signed agents[] verifies per sub-agent; tampering fails closed", async () => {
+  const { secretKey, publicKey } = generateKeyPair();
+  const body: PassportForAgentsBody = {
+    spec_version: "0.2.0",
+    agent_name: "AgoraMind",
+    agent_type: "a2a_agent",
+    owner_domain: "agoramind.ai",
+    public_key: encodePublicKey(publicKey),
+    capabilities: ["debate"],
+    agents: [{ id: "the_ethicist", name: "The Ethicist", capabilities: ["debate"] }],
+    issued_at: "2026-06-05T00:00:00Z",
+  };
+  const doc = signPassport(body, secretKey) as unknown as AgentPassport;
+  assert.equal(await verifyListedAgent(doc, "the_ethicist"), true);
+  assert.equal(await verifyListedAgent(doc, "unlisted"), false);
+  const r = await verifyPassport(doc, "agoramind.ai");
+  assert.equal(r.valid, true);
+  assert.equal(r.listedAgents?.length, 1);
+  // tamper a signed sub-agent entry → fail closed
+  doc.agents![0].name = "Evil";
+  assert.equal(await verifyListedAgent(doc, "the_ethicist"), false);
+  assert.equal((await verifyPassport(doc, "agoramind.ai")).valid, false);
+});
 
 // Cross-validation: our @noble-signed fixture must verify under the SDK's
 // platform WebCrypto Ed25519 — proving interop of the open wire format.
