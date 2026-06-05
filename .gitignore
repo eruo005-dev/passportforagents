@@ -52,3 +52,5 @@ next-env.d.ts
 agoramind-passport-key.SECRET.json
 .devlive.log
 agoramind-agent-passport.json
+
+.vercel
