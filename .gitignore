@@ -50,3 +50,5 @@ next-env.d.ts
 
 # agoramind showcase artifacts (private key must not be committed)
 agoramind-passport-key.SECRET.json
+.devlive.log
+agoramind-agent-passport.json
