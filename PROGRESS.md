@@ -207,6 +207,25 @@ uptime, user_rating); no zeroed weights.
 - **Launch surface**: public `/docs` hub, README badge snippet, MCP self-listing
   manifest (validated; publish human-gated), billable-count dedup refactor.
 
+## Sprint 9 — Per-agent identities under a verified domain ✅ (CEO: APPROVED)
+
+Reviewer PASS (all 7 ACs, no BLOCKER/HIGH/MEDIUM). 58 unit + subagents/verify-api
+integration green; 0.1.0 backward-compat preserved.
+- **Stable public Agent ID** (`agt_`, crockford base32) on every agent —
+  resolvable by Verify API (`?agent=agt_…`), profile, dashboard, API body.
+- **First-class verified `domains`**: verify a domain ONCE → register many agents
+  under it, each inheriting status + identity trust signals (real score).
+- **Spec 0.2.0**: optional signed `agents[]` in the body. A sub-agent is
+  `key_verified` ONLY by re-deriving the domain signature + array membership at
+  verify time — **tampered/injected entries fail CLOSED, no DB-trust path**.
+  Mirrored in SPEC.md, reference verifier, and the SDK.
+- Dashboard register-sub-agent flow.
+- **Demo proven:** AgoraMind verifies agoramind.ai once → The Ethicist (agt_…) +
+  The Provocateur (agt_…) each get their own profile, badge, and trust score 50/100.
+
+This is the differentiator vs commodity scanners (durable per-agent identity, not
+a one-off URL grade) and the natural substrate for A2A agent-card mapping later.
+
 ## BUILD STATE (2026-06-05): zero-human-input surface EXHAUSTED — team waiting
 
 Sprints 1–8 + billing ship a functionally complete, self-dogfooded product +
