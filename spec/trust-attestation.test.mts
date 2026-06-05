@@ -78,3 +78,31 @@ test("attestation: issuer key pin", () => {
     false,
   );
 });
+
+test("attestation: offline freshness via signed expires_at", () => {
+  const { secretKey } = generateKeyPair();
+  const att = signTrustAttestation(
+    buildTrustAttestationBody({
+      subject,
+      signals,
+      computed_at: COMPUTED_AT,
+      expires_at: "2026-07-05T00:00:00Z",
+    }),
+    secretKey,
+  );
+  assert.equal(att.expires_at, "2026-07-05T00:00:00Z"); // inside the signed body
+  // Integrity holds regardless of the clock; freshness is a SEPARATE verdict.
+  const before = verifyTrustAttestation(att, { now: "2026-06-10T00:00:00Z" });
+  assert.equal(before.valid, true);
+  assert.equal(before.fresh, true);
+  const after = verifyTrustAttestation(att, { now: "2026-08-01T00:00:00Z" });
+  assert.equal(after.valid, true);
+  assert.equal(after.fresh, false);
+  assert.equal(verifyTrustAttestation(att).fresh, null); // no `now` → undecidable
+  // expires_at is signed: tampering it breaks the signature.
+  att.expires_at = "2099-01-01T00:00:00Z";
+  assert.equal(
+    verifyTrustAttestation(att, { now: "2026-06-10T00:00:00Z" }).checks.signature_valid,
+    false,
+  );
+});

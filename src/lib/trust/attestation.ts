@@ -64,6 +64,10 @@ export type TrustAttestationBody = {
   breakdown: AttestationSignalRow[];
   /** RFC 3339 timestamp of computation (passed in — keeps this fn pure). */
   computed_at: string;
+  /** Optional RFC 3339 expiry — issuer-chosen freshness window. Additive and
+   *  covered by the signature; absent = no expiry. Lets a verifier decide
+   *  `fresh` fully OFFLINE, with no live call to us (OCSP-stapling analog). */
+  expires_at?: string;
 };
 
 export type TrustAttestation = TrustAttestationBody & {
@@ -108,6 +112,8 @@ export function buildTrustAttestationBody(args: {
   subject: AttestationSubject;
   signals: ScoreInput[];
   computed_at: string;
+  /** Optional issuer-chosen expiry (RFC 3339) for offline freshness checks. */
+  expires_at?: string;
   issuer_domain?: string;
   /** Optional override evidence pointers per signal type. */
   evidence?: Partial<Record<TrustSignalType, string>>;
@@ -131,6 +137,7 @@ export function buildTrustAttestationBody(args: {
         defaultEvidenceRef(r.signalType, args.subject, issuer_domain),
     })),
     computed_at: args.computed_at,
+    ...(args.expires_at ? { expires_at: args.expires_at } : {}),
   };
 }
 
@@ -167,6 +174,10 @@ export type AttestationVerification = {
     issuer_matches: boolean;
   };
   recomputed_score: number;
+  /** Liveness verdict vs `expires_at`: true/false when BOTH expiry and `now`
+   *  are known, else null. Deliberately independent of `valid` (integrity) —
+   *  same split as the rest of the product: verified ≠ fresh. */
+  fresh: boolean | null;
   error?: string;
 };
 
@@ -178,7 +189,7 @@ export type AttestationVerification = {
  */
 export function verifyTrustAttestation(
   att: TrustAttestation,
-  opts?: { expectedIssuerKey?: string },
+  opts?: { expectedIssuerKey?: string; now?: string },
 ): AttestationVerification {
   const checks = {
     weights_canonical: false,
@@ -232,6 +243,7 @@ export function verifyTrustAttestation(
       valid: false,
       checks,
       recomputed_score,
+      fresh: null,
       error: (e as Error).message,
     };
   }
@@ -242,5 +254,14 @@ export function verifyTrustAttestation(
     checks.score_recomputes &&
     checks.signature_valid &&
     checks.issuer_matches;
-  return { valid, checks, recomputed_score };
+
+  let fresh: boolean | null = null;
+  if (att.expires_at && opts?.now) {
+    const exp = Date.parse(att.expires_at);
+    const now = Date.parse(opts.now);
+    // Fail closed: an unparseable signed expiry reads as STALE, not "unknown".
+    // Only an unparseable caller-supplied clock is genuinely undecidable (null).
+    fresh = !Number.isFinite(now) ? null : Number.isFinite(exp) ? now < exp : false;
+  }
+  return { valid, checks, recomputed_score, fresh };
 }
