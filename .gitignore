@@ -48,6 +48,9 @@ spec/fixtures/self-keypair.json
 *.tsbuildinfo
 next-env.d.ts
 
+# private signing keys — never commit any *.SECRET.json
+*.SECRET.json
+
 # agoramind showcase artifacts (private key must not be committed)
 agoramind-passport-key.SECRET.json
 .devlive.log

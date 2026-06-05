@@ -18,7 +18,7 @@ export const FREE_VERIFY_QUOTA = PLAN_QUOTAS.free;
 export type VerifyApiResult = { status: number; body: Record<string, unknown> };
 
 /** Resolve an agent by public Agent ID (agt_…), slug, or claimed/verified domain. */
-async function findAgentForApi(query: string) {
+export async function findAgentForApi(query: string) {
   const q = query.trim();
   if (isAgentPublicId(q)) {
     const byId = await db.query.agents.findFirst({ where: eq(agents.publicId, q) });
