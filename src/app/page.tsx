@@ -56,7 +56,7 @@ export default function Home() {
         <div className="mt-10 flex flex-wrap gap-3">
           <Show when="signed-out">
             <SignUpButton mode="modal">
-              <Button size="lg">Verify your MCP server</Button>
+              <Button size="lg">Get started</Button>
             </SignUpButton>
           </Show>
           <Show when="signed-in">

@@ -14,10 +14,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_DESCRIPTION =
+  "Is this agent who it claims to be, and is it any good? Verification, a trust score, and a public registry for the open MCP ecosystem.";
+
 export const metadata: Metadata = {
-  title: "PassportForAgents — the verified-agent badge & trust API",
-  description:
-    "Is this agent who it claims to be, and is it any good? Verification, a trust score, and a public registry for the open MCP / A2A ecosystem.",
+  metadataBase: new URL("https://passportforagents.com"),
+  title: {
+    default: "PassportForAgents — the verified-agent badge & trust API",
+    template: "%s · PassportForAgents",
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: "PassportForAgents",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "PassportForAgents",
+    url: "https://passportforagents.com",
+    title: "PassportForAgents — the verified-agent badge & trust API",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PassportForAgents — the verified-agent badge & trust API",
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
