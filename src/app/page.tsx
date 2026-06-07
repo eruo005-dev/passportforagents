@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function Home() {
   return (
@@ -70,11 +71,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex h-12 max-w-5xl items-center px-6 text-xs text-muted-foreground">
-          MIT-licensed open spec · domain control + Ed25519 = identity
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
