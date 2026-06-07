@@ -105,7 +105,12 @@ export default async function RegistryPage({
                     {r.claimedStatus === "key_verified" ? "Verified" : "Claimed"}
                   </Link>
                 ) : (
-                  <span className="text-xs text-muted-foreground">unclaimed</span>
+                  <span
+                    className="cursor-help text-xs text-muted-foreground underline decoration-dotted underline-offset-2"
+                    title="No operator has claimed this server on PassportForAgents yet — its identity is unverified. Claim the domain to publish a verified passport."
+                  >
+                    unclaimed
+                  </span>
                 )}
               </div>
             </li>
