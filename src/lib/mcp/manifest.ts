@@ -23,7 +23,7 @@ export const MCP_SERVER_MANIFEST: McpManifest = {
   description:
     "Verify whether an MCP or A2A agent is who it claims to be: identity (domain control + Ed25519), verification status, and a transparent 0–100 trust score.",
   version: "0.1.0",
-  repository: { url: "https://github.com/passportforagents/passportforagents", source: "github" },
+  repository: { url: "https://github.com/eruo005-dev/passportforagents", source: "github" },
   websiteUrl: "https://passportforagents.com",
 };
 

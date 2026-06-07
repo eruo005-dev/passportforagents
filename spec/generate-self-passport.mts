@@ -22,7 +22,7 @@ const body: PassportForAgentsBody = {
   public_key: encodePublicKey(publicKey),
   capabilities: ["verify", "registry", "trust-score"],
   homepage: "https://passportforagents.com",
-  repo: "https://github.com/passportforagents/passportforagents",
+  repo: "https://github.com/eruo005-dev/passportforagents",
   issued_at: "2026-06-04T00:00:00Z",
 };
 const passport = signPassport(body, secretKey);
