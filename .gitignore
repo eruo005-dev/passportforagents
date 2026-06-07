@@ -51,6 +51,13 @@ next-env.d.ts
 # private signing keys — never commit any *.SECRET.json
 *.SECRET.json
 
+# internal docs / agent config — kept local, not in the public repo
+/CLAUDE.md
+/PROGRESS.md
+/RESEARCH.md
+/WORKING_AGREEMENT.md
+/.claude/
+
 # agoramind showcase artifacts (private key must not be committed)
 agoramind-passport-key.SECRET.json
 .devlive.log

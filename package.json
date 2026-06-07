@@ -2,6 +2,28 @@
   "name": "agentpassport",
   "version": "0.1.0",
   "private": true,
+  "description": "The verified-agent badge, trust API, and public registry for the open MCP ecosystem — identity from domain control + Ed25519, no blockchain, no DID.",
+  "license": "MIT",
+  "homepage": "https://passportforagents.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eruo005-dev/passportforagents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eruo005-dev/passportforagents/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "agent-identity",
+    "ed25519",
+    "verification",
+    "trust-score",
+    "transparency-log",
+    "well-known",
+    "rfc8785"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

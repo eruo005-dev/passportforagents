@@ -3,6 +3,11 @@
 **The verified-agent badge, trust API, and public registry for the open MCP / A2A ecosystem.**
 _Is this agent who it claims to be — and is it any good? Answered in one API call._
 
+[![CI](https://github.com/eruo005-dev/passportforagents/actions/workflows/ci.yml/badge.svg)](https://github.com/eruo005-dev/passportforagents/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Spec](https://img.shields.io/badge/spec-Agent%20Passport%200.2.0-blue)](./SPEC.md)
+[![Live](https://img.shields.io/badge/live-passportforagents.com-black)](https://passportforagents.com)
+
 Identity is established the same way the web already does it: **control of a
 domain + an Ed25519-signed JSON document**. No blockchain, no DID method, no
 central authority required to verify. See [`SPEC.md`](./SPEC.md).
@@ -67,7 +72,6 @@ spec/
   generate-fixture.mts  # signed fixture generator
 drizzle/                # checked-in migration SQL
 SPEC.md                 # the open spec
-PROGRESS.md             # build log
 ```
 
 ## Embed the verified badge
@@ -86,4 +90,4 @@ links back to its public profile (unspoofable — it's a live lookup):
 - [`docs/verify-api.md`](./docs/verify-api.md) · [`docs/trust-score.md`](./docs/trust-score.md)
 - **`@passportforagents/verify`** ([packages/verify](./packages/verify)) — zero-dep verify-before-connect SDK
 
-Progress is tracked in [`PROGRESS.md`](./PROGRESS.md). License: [MIT](./LICENSE).
+**Contributing:** [`CONTRIBUTING.md`](./CONTRIBUTING.md) · **Security:** [`SECURITY.md`](./SECURITY.md) · **Conduct:** [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) · **License:** [MIT](./LICENSE).
