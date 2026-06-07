@@ -11,7 +11,7 @@ export function SiteHeader() {
         >
           passport<span className="text-muted-foreground">foragents</span>
         </Link>
-        <nav className="flex gap-4 text-xs text-muted-foreground">
+        <nav className="flex flex-wrap gap-4 text-xs text-muted-foreground">
           <Link href="/registry" className="hover:underline">
             Registry
           </Link>

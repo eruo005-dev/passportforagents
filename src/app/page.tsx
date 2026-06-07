@@ -2,16 +2,17 @@ import Link from "next/link";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
+import { MobileNav } from "@/components/mobile-nav";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b border-border">
+      <header className="relative border-b border-border">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
           <Link href="/" className="font-mono text-sm font-semibold tracking-tight">
             passport<span className="text-muted-foreground">foragents</span>
           </Link>
-          <nav className="flex items-center gap-3">
+          <nav className="hidden items-center gap-3 sm:flex">
             <Button asChild variant="ghost" size="sm">
               <Link href="/registry">Registry</Link>
             </Button>
@@ -35,6 +36,7 @@ export default function Home() {
               <UserButton />
             </Show>
           </nav>
+          <MobileNav />
         </div>
       </header>
 
