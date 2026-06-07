@@ -16,7 +16,9 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="rounded-md border border-border bg-card p-3 text-xs">
-          Draft — to be reviewed by counsel before public launch.
+          PassportForAgents is a free, open beta, provided as-is with no warranty.
+          The open spec and reference verifier are MIT-licensed (see the repo);
+          these terms govern the hosted service.
         </p>
         <p className="font-mono text-xs">Last updated: 2026-06-07</p>
 

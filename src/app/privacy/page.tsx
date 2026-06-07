@@ -16,8 +16,9 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="rounded-md border border-border bg-card p-3 text-xs">
-          Draft — to be reviewed by counsel before public launch. It reflects our
-          actual data practices as of the date below.
+          PassportForAgents is a free, open beta. This policy describes our actual
+          data practices in plain terms; the hosted service is provided as-is (see
+          the Terms). We will expand it before any future commercial offering.
         </p>
         <p className="font-mono text-xs">Last updated: 2026-06-07</p>
 
@@ -49,12 +50,34 @@ export default function PrivacyPage() {
           third-party dependency.
         </p>
 
-        <h2 className="pt-4 text-xl font-semibold text-foreground">Processors</h2>
+        <h2 className="pt-4 text-xl font-semibold text-foreground">
+          Processors &amp; where data lives
+        </h2>
         <p>
-          We rely on a small set of infrastructure providers acting as processors
-          on our behalf: an authentication provider, a managed Postgres database,
-          a hosting and CDN provider, and (when paid features are enabled) a
-          payment processor. Each processes data only to deliver the service.
+          We use a small set of infrastructure providers acting as processors on
+          our behalf, each handling data only to run the service:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            <span className="text-foreground">Clerk</span> — authentication (your
+            email and session).
+          </li>
+          <li>
+            <span className="text-foreground">Supabase</span> — managed Postgres
+            (accounts, hashed API keys, verification records).
+          </li>
+          <li>
+            <span className="text-foreground">Vercel</span> — hosting and CDN.
+          </li>
+        </ul>
+        <p>
+          These providers operate in the United States, so your data may be
+          processed there. For EU/UK users, our lawful basis is the legitimate
+          interest in providing the service you signed up for (and consent for any
+          optional features). We retain account data only while your account is
+          active, plus a short window for security logs; public registry entries
+          you publish stay public until you remove them. Request access or
+          deletion any time via the contact below.
         </p>
 
         <h2 className="pt-4 text-xl font-semibold text-foreground">Cookies</h2>

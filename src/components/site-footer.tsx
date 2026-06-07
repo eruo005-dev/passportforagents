@@ -20,6 +20,9 @@ export function SiteFooter() {
           <Link href="/spec" className="hover:underline">
             Spec
           </Link>
+          <Link href="/pricing" className="hover:underline">
+            Pricing
+          </Link>
           <Link href="/about" className="hover:underline">
             About
           </Link>
