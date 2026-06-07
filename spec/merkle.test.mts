@@ -6,6 +6,8 @@ import {
   inclusionProof,
   rootFromInclusionProof,
   verifyInclusion,
+  consistencyProof,
+  verifyConsistency,
 } from "../src/lib/transparency/merkle";
 
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -74,6 +76,52 @@ test("merkle: tampering fails closed", () => {
   assert.equal(v({ proof: bad }), false);
   // out-of-range index → null (not a throw)
   assert.equal(rootFromInclusionProof(7, 7, leafHash(es[0]), proof), null);
+});
+
+test("merkle: consistency proofs verify the append-only prefix, all 0<m<n<=16", () => {
+  for (let n = 2; n <= 16; n++) {
+    const es = entries(n);
+    const rootN = merkleRoot(es);
+    for (let m = 1; m < n; m++) {
+      const rootM = merkleRoot(es.slice(0, m));
+      const proof = consistencyProof(es, m);
+      assert.equal(
+        verifyConsistency({
+          first: m,
+          second: n,
+          proof,
+          firstRoot: rootM,
+          secondRoot: rootN,
+        }),
+        true,
+        `consistency m=${m} n=${n}`,
+      );
+    }
+  }
+});
+
+test("merkle: consistency fails closed on a rewritten/forked history", () => {
+  const es = entries(11);
+  const rootN = merkleRoot(es);
+  const m = 6;
+  const rootM = merkleRoot(es.slice(0, m));
+  const proof = consistencyProof(es, m);
+  const v = (o: Partial<Parameters<typeof verifyConsistency>[0]>) =>
+    verifyConsistency({
+      first: m,
+      second: 11,
+      proof,
+      firstRoot: rootM,
+      secondRoot: rootN,
+      ...o,
+    });
+  assert.equal(v({ firstRoot: merkleRoot(es.slice(0, 5)) }), false); // forged old root
+  assert.equal(v({ secondRoot: merkleRoot(entries(12)) }), false); // forged new root
+  const bad = proof.map((p) => p.slice());
+  bad[0][0] ^= 0xff;
+  assert.equal(v({ proof: bad }), false); // flipped proof byte
+  assert.equal(v({ first: 0 }), false); // out of range
+  assert.equal(v({ first: 11 }), false); // first == second
 });
 
 test("merkle: append changes the root; old proofs still verify vs the old root", () => {
