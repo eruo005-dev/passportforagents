@@ -73,7 +73,7 @@ export default async function RegistryDetailPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
         <h1 className="break-all text-2xl font-semibold tracking-tight">{entry.name}</h1>
         {entry.version && (
           <p className="mt-1 font-mono text-xs text-muted-foreground">v{entry.version}</p>

@@ -23,7 +23,7 @@ export default async function BillingPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
         <Link href="/dashboard" className="font-mono text-xs text-muted-foreground">
           ← dashboard
         </Link>

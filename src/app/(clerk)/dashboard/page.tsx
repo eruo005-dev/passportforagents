@@ -24,7 +24,7 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Your agents</h1>

@@ -29,7 +29,7 @@ export default function NotFound() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+      <main id="main" className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
         <p className="font-mono text-sm text-muted-foreground">404</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">
           Page not found

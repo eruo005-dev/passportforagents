@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { MobileNav } from "@/components/mobile-nav";
@@ -19,28 +18,18 @@ export default function Home() {
             <Button asChild variant="ghost" size="sm">
               <Link href="/docs">Docs</Link>
             </Button>
-            <Show when="signed-out">
-              <SignInButton mode="modal">
-                <Button variant="ghost" size="sm">
-                  Sign in
-                </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button size="sm">Get started</Button>
-              </SignUpButton>
-            </Show>
-            <Show when="signed-in">
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <UserButton />
-            </Show>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/sign-in">Sign in</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/sign-up">Get started</Link>
+            </Button>
           </nav>
           <MobileNav />
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-24">
+      <main id="main" className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-24">
         <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
           verified-agent badge · trust API · public registry
         </p>
@@ -57,17 +46,10 @@ export default function Home() {
           ecosystem.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Show when="signed-out">
-            <SignUpButton mode="modal">
-              <Button size="lg">Get started</Button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <Button asChild size="lg">
-              <Link href="/dashboard">Go to dashboard</Link>
-            </Button>
-          </Show>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild size="lg" className="h-11">
+            <Link href="/sign-up">Get started</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-11">
             <Link href="/spec">Read the open spec</Link>
           </Button>
         </div>
