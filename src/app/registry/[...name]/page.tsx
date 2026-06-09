@@ -30,6 +30,7 @@ export async function generateMetadata({
   return {
     title: `${entry.name} — MCP Registry — PassportForAgents`,
     description: entry.description ?? `MCP server ${entry.name}`,
+    alternates: { canonical: `/registry/${encodeName(entry.name)}` },
   };
 }
 

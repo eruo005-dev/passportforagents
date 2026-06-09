@@ -22,6 +22,7 @@ export async function generateMetadata({
   return {
     title: `${data.agent.name} — PassportForAgents`,
     description: `Verification status and identity for ${data.agent.name} (${data.agent.domain}).`,
+    alternates: { canonical: `/agent/${slug}` },
   };
 }
 
@@ -104,7 +105,7 @@ export default async function PublicProfile({
           <p className="mt-4 max-w-2xl text-muted-foreground">{agent.description}</p>
         )}
 
-        <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -162,7 +163,7 @@ export default async function PublicProfile({
               )}
             </CardContent>
           </Card>
-        </dl>
+        </div>
 
         {/* Transparent trust score — a documented weighted sum, never a black box. */}
         <Card className="mt-4">

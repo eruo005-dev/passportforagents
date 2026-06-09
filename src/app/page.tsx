@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { MobileNav } from "@/components/mobile-nav";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Home() {
   return (

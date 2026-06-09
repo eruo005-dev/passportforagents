@@ -23,7 +23,9 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: "PassportForAgents",
-  alternates: { canonical: "/" },
+  // NOTE: no site-wide `alternates.canonical` here — a root-layout canonical
+  // makes every page self-report the homepage as canonical (deindexing the
+  // registry + agent profiles). Each route sets its own canonical instead.
   openGraph: {
     type: "website",
     siteName: "PassportForAgents",

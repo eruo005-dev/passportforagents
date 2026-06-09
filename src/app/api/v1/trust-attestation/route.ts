@@ -1,6 +1,7 @@
 import { findAgentForApi } from "@/lib/api/verify";
 import { loadTrustScore } from "@/lib/trust/load";
 import { issueTrustAttestation, issuerConfigured } from "@/lib/trust/issuer";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 /**
  * GET /api/v1/trust-attestation?agent=<agt_id|slug|domain>
@@ -20,6 +21,21 @@ function json(status: number, body: unknown, cache = "no-store") {
 }
 
 export async function GET(req: Request) {
+  // Throttle this keyless endpoint (it does DB lookups + an Ed25519 signature
+  // per call) to blunt DoS / cost-amplification. 30 req/min/IP; cacheable
+  // responses are additionally absorbed by the CDN.
+  const rl = rateLimit(`attest:${clientIp(req)}`, 30, 60_000);
+  if (!rl.ok) {
+    return new Response(JSON.stringify({ error: "rate limit exceeded" }), {
+      status: 429,
+      headers: {
+        "content-type": "application/json",
+        "retry-after": String(rl.retryAfter),
+        "cache-control": "no-store",
+      },
+    });
+  }
+
   const agentQuery = new URL(req.url).searchParams.get("agent");
   if (!agentQuery) return json(400, { error: "missing ?agent= parameter" });
   if (!issuerConfigured())
