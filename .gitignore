@@ -64,3 +64,7 @@ agoramind-passport-key.SECRET.json
 agoramind-agent-passport.json
 
 .vercel
+
+# local audit artifacts
+lh-*.json
+psi-*.json
