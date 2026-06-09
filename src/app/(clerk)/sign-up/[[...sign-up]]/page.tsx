@@ -2,7 +2,7 @@ import { ClerkLoading, ClerkLoaded, SignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 py-16">
+    <main id="main" className="flex min-h-screen items-center justify-center px-6 py-16">
       {/* Feedback while Clerk JS initializes — no more blank dark screen. */}
       <ClerkLoading>
         <div
@@ -20,6 +20,6 @@ export default function SignUpPage() {
       <ClerkLoaded>
         <SignUp />
       </ClerkLoaded>
-    </div>
+    </main>
   );
 }
