@@ -13,6 +13,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/spec`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/registry`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/docs`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/pricing`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/about`, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/privacy`, changeFrequency: "monthly", priority: 0.2 },
+    { url: `${base}/terms`, changeFrequency: "monthly", priority: 0.2 },
   ];
 
   const claimed = await db.select({ slug: agents.slug, lastSeenAt: agents.lastSeenAt }).from(agents);
